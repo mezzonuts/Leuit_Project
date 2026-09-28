@@ -1,0 +1,299 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  lint-typecheck:
+    name: Lint & TypeCheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Frontend Lint
+        run: pnpm lint
+        working-directory: frontend
+
+      - name: Frontend TypeCheck
+        run: pnpm typecheck
+        working-directory: frontend
+
+      - name: Backend Lint (Ruff)
+        run: uv run ruff check .
+        working-directory: backend
+
+      - name: Backend TypeCheck (mypy)
+        run: uv run mypy .
+        working-directory: backend
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Frontend Tests (Vitest)
+        run: pnpm test:coverage
+        working-directory: frontend
+
+      - name: Backend Tests (pytest)
+        run: uv run pytest --cov=app --cov-report=xml --cov-report=term-missing
+        working-directory: backend
+
+      - name: Upload frontend coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: frontend/coverage/lcov.info
+          flags: frontend
+
+      - name: Upload backend coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage.xml
+          flags: backend
+
+  build-frontend:
+    name: Build Frontend
+    needs: [lint-typecheck, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build frontend
+        run: pnpm build
+        working-directory: frontend
+
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 7
+
+  build-binary-windows:
+    name: Build Binary (Windows)
+    needs: build-frontend
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Obfuscate security modules (PyArmor)
+        run: pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+        working-directory: backend
+        continue-on-error: true
+
+      - name: Build binary (PyInstaller)
+        run: |
+          pyinstaller --noconfirm --onedir --windowed `
+            --add-data "frontend/dist;dist" `
+            --hidden-import "sqlcipher3" `
+            --name "LeuitApp" `
+            main.py
+        working-directory: backend
+
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: LeuitApp-win64
+          path: backend/dist/LeuitApp
+          retention-days: 30
+
+  build-binary-macos:
+    name: Build Binary (macOS)
+    needs: build-frontend
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Obfuscate security modules (PyArmor)
+        run: pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+        working-directory: backend
+        continue-on-error: true
+
+      - name: Build binary (PyInstaller)
+        run: |
+          pyinstaller --noconfirm --onedir --windowed \
+            --add-data "frontend/dist:dist" \
+            --hidden-import "sqlcipher3" \
+            --name "LeuitApp" \
+            main.py
+        working-directory: backend
+
+      - name: Create DMG
+        run: |
+          hdiutil create -volname "LeuitApp" -srcfolder backend/dist/LeuitApp -ov -format UDZO LeuitApp-macos.dmg
+        working-directory: backend
+
+      - name: Upload macOS binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: LeuitApp-macos
+          path: backend/dist/LeuitApp
+          retention-days: 30
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: LeuitApp-dmg
+          path: backend/LeuitApp-macos.dmg
+          retention-days: 30
+
+  release:
+    name: Create Release
+    needs: [build-binary-windows, build-binary-macos]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows binary
+        uses: actions/download-artifact@v4
+        with:
+          name: LeuitApp-win64
+          path: dist/win64
+
+      - name: Download macOS binary
+        uses: actions/download-artifact@v4
+        with:
+          name: LeuitApp-macos
+          path: dist/macos
+
+      - name: Download macOS DMG
+        uses: actions/download-artifact@v4
+        with:
+          name: LeuitApp-dmg
+          path: dist/macos
+
+      - name: Create Windows ZIP
+        run: |
+          cd dist/win64
+          zip -r ../LeuitApp-win64.zip .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/LeuitApp-win64.zip
+            dist/macos/LeuitApp-macos.dmg
+          generate_release_notes: true

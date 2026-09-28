@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+*.exe
+*.dmg
+*.app
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.uv/
+uv.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+htmlcov/
+.pytest_cache/
+.coverage
+
+# PyInstaller
+*.spec
+dist/
+build/
+
+# PyArmor
+.pyarmor/
+
+# Local config
+*.local.*
+local-env.yaml
+
+# License & keys
+*.key
+*.pem
+*.pfx
+dev_private_key.hex
+dev_public_key.hex
+
+# Database
+*.db
+*.enc
+*.sqlite
+
+# Cache
+.cache/
+.turbo/

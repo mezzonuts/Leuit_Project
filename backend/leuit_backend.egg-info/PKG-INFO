@@ -1,0 +1,285 @@
+Metadata-Version: 2.4
+Name: leuit-backend
+Version: 1.0.0
+Summary: LEUIT Backend - Local-First F&B Demand & Inventory Forecasting API
+Author-email: LEUIT Team <dev@leuit.app>
+License: Proprietary
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Framework :: FastAPI
+Classifier: Topic :: Office/Business :: Financial :: Point-Of-Sale
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: uvicorn[standard]>=0.29.0
+Requires-Dist: sqlalchemy>=2.0.30
+Requires-Dist: pysqlcipher3>=1.0.0
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: pydantic-settings>=2.3.0
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: python-jose[cryptography]>=3.3.0
+Requires-Dist: passlib[bcrypt]>=1.7.4
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: pandas>=2.2.0
+Requires-Dist: numpy>=1.26.0
+Requires-Dist: prophet>=1.1.5
+Requires-Dist: holidays>=0.45.0
+Requires-Dist: requests>=2.31.0
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: pynacl>=1.5.0
+Requires-Dist: pyarmor>=8.5.0
+Requires-Dist: pyinstaller>=6.5.0
+Requires-Dist: loguru>=0.7.2
+Requires-Dist: orjson>=3.9.0
+Requires-Dist: email-validator>=2.1.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.2.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.14.0; extra == "dev"
+Requires-Dist: httpx>=0.27.0; extra == "dev"
+Requires-Dist: ruff>=0.4.0; extra == "dev"
+Requires-Dist: mypy>=1.10.0; extra == "dev"
+Requires-Dist: types-requests>=2.31.0; extra == "dev"
+Requires-Dist: types-pandas; extra == "dev"
+
+# LEUIT Backend
+
+Backend API for LEUIT Desktop App - Local-First F&B Demand & Inventory Forecasting.
+
+## Tech Stack
+
+- **Language**: Python 3.11+
+- **Framework**: FastAPI
+- **Database**: SQLite with SQLCipher (AES-256 encryption)
+- **ORM**: SQLAlchemy 2.0
+- **Package Manager**: uv
+- **Security**: Ed25519 license verification, Argon2id key derivation, PyArmor obfuscation
+- **Forecasting**: Prophet + BMKG Weather API
+- **Packaging**: PyInstaller + PyArmor
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- uv (install: `pip install uv`)
+
+### Installation
+
+```bash
+# Install dependencies
+uv sync
+
+# Generate development keys (first time only)
+python scripts/generate_keys.py
+
+# Generate development license
+python scripts/generate_license.py
+
+# Run development server
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+# Edit .env with your settings
+```
+
+Key variables:
+- `CLOUD_PUBLIC_KEY`: Ed25519 public key for license verification (generate with `scripts/generate_keys.py`)
+- `DATABASE_PATH`: Path to encrypted SQLite database
+- `BMKG_DEFAULT_ADM4`: Weather region code (default: Bandung Dago/Coblong)
+
+## Project Structure
+
+```
+backend/
+├── app/
+│   ├── api/v1/           # REST API routes
+│   │   ├── auth_security.py    # Database unlock & license status
+│   │   ├── inventory.py        # Ingredient CRUD, stock opname, valuation
+│   │   ├── pos_sync.py         # CSV upload & reconciliation
+│   │   ├── bom.py              # Menu, recipes, recipe scaler
+│   │   ├── purchases.py        # Suppliers, purchases, payables
+│   │   └── forecast.py         # Restock recommendations, weather
+│   ├── core/
+│   │   ├── config.py           # Settings management
+│   │   ├── database.py         # SQLCipher connection
+│   │   └── security/           # Security modules
+│   │       ├── hardware.py     # Hardware fingerprinting
+│   │       ├── licensing.py    # Ed25519 license verification
+│   │       └── key_envelope.py # Dual-key envelope encryption
+│   ├── models/               # SQLAlchemy models
+│   ├── schemas/              # Pydantic schemas
+│   └── services/             # Business logic
+├── scripts/
+│   ├── generate_keys.py      # Generate Ed25519 key pair
+│   ├── generate_license.py   # Generate local license file
+│   └── build_binary.py       # Build desktop binary
+├── main.py                   # Desktop launcher
+├── LeuitApp.spec             # PyInstaller spec
+├── pyproject.toml            # Project config
+└── uv.lock                   # Locked dependencies
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/v1/auth/unlock` - Unlock database with PIN
+- `GET /api/v1/auth/status` - Check auth & license status
+
+### Inventory
+- `GET /api/v1/inventory` - List ingredients
+- `POST /api/v1/inventory` - Create ingredient
+- `PUT /api/v1/inventory/{id}` - Update ingredient
+- `DELETE /api/v1/inventory/{id}` - Archive ingredient
+- `POST /api/v1/inventory/{id}/stock-opname` - Stock opname
+- `GET /api/v1/valuation/summary` - Valuation summary
+- `GET /api/v1/valuation/items` - Detailed valuation
+- `GET /api/v1/valuation/export-csv` - Export CSV
+- `GET /api/v1/inventory/alerts` - Critical alerts
+
+### POS Sync
+- `POST /api/v1/sync/pos-csv` - Upload & reconcile CSV
+- `GET /api/v1/sync/history` - Sync history
+
+### BOM & Recipe
+- `GET /api/v1/bom/menus` - List menus
+- `POST /api/v1/bom/menus` - Create menu
+- `GET /api/v1/bom/menus/{id}` - Get menu with recipes
+- `POST /api/v1/bom/menus/{id}/recipes` - Add recipe item
+- `POST /api/v1/bom/scaler` - Recipe scaler simulation
+
+### Purchases
+- `GET /api/v1/purchases/suppliers` - List suppliers
+- `POST /api/v1/purchases/suppliers` - Create supplier
+- `GET /api/v1/purchases` - List purchases
+- `POST /api/v1/purchases` - Record purchase
+- `POST /api/v1/purchases/{id}/pay` - Mark as paid
+- `GET /api/v1/purchases/payables` - Accounts payable
+- `GET /api/v1/purchases/restock-sheet` - Restock recommendations
+
+### Forecast
+- `GET /api/v1/forecast/weather` - Weather forecast
+- `GET /api/v1/forecast/restock-sheet` - Full restock sheet
+
+## Database Schema
+
+Key tables:
+- `ingredients` - Master bahan baku
+- `suppliers` - Master suplier
+- `menu_items` - Menu kasir
+- `recipe_items` - BOM resep
+- `sales_transactions` - Transaksi POS (deduplicated)
+- `pos_sync_logs` - Log sinkronisasi CSV
+- `ingredient_daily_usage` - Penggunaan harian untuk chart
+- `inventory_purchases` - Pembelian stok (Cash/Credit)
+- `operational_audit_logs` - Audit trail
+- `security_keyring` - Encrypted DEK envelopes
+- `security_audit_clock` - Monotonic clock guard
+- `app_license` - License info
+
+## Security
+
+### Dual-Key Envelope Encryption
+1. Database encrypted with random DEK (Data Encryption Key)
+2. DEK encrypted twice:
+   - **Owner Envelope**: Encrypted with Owner's passkey (Argon2id)
+   - **Developer Envelope**: Encrypted with Developer's master public key (Sealed Box)
+
+### License Verification
+- Ed25519 signature verification
+- Hardware binding (motherboard + CPU)
+- Monotonic clock guard (anti-time-travel)
+- Grace period (3 days after expiry)
+
+### Anti-Tampering
+- PyArmor obfuscation of security modules
+- SQLCipher transparent encryption
+- Hardware-locked licenses
+
+## Building Desktop Binary
+
+```bash
+# Build everything
+python scripts/build_binary.py
+
+# Or step by step:
+# 1. Build frontend
+cd ../frontend && pnpm build && cd ../backend
+
+# 2. Obfuscate security modules
+pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+
+# 3. Build binary
+pyinstaller --noconfirm --onedir --windowed \
+  --add-data "frontend/dist;dist" \
+  --hidden-import "sqlcipher3" \
+  --name "LeuitApp" \
+  main.py
+```
+
+Output:
+- Windows: `dist/LeuitApp/LeuitApp.exe`
+- macOS: `dist/LeuitApp/LeuitApp.app`
+
+## Development
+
+### Running Tests
+```bash
+uv run pytest --cov=app --cov-report=term-missing
+```
+
+### Linting
+```bash
+uv run ruff check .
+uv run mypy .
+```
+
+### Database Migrations
+Currently using `create_all()`. For production, consider Alembic.
+
+## License Generation (Development)
+
+```bash
+# Generate keys (once)
+python scripts/generate_keys.py
+
+# Generate license (365 days, full features)
+python scripts/generate_license.py --days 365 --features full forecast sync bom purchases
+
+# Custom license
+python scripts/generate_license.py --id "DEV-CAFE-001" --days 30 --output ./test_license.key
+```
+
+## BMKG Weather Integration
+
+Uses public BMKG API: `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode}`
+
+Default region: Bandung Dago/Coblong (32.73.08.1001)
+
+Other regions:
+- Bandung Pusat: 32.73.01.1001
+- Lembang: 32.17.03.2001
+
+## Troubleshooting
+
+### Database won't unlock
+- Verify passkey is correct
+- Check license file exists at `~/.leuit/license.key`
+- Ensure hardware hasn't changed
+
+### PyInstaller errors
+- Ensure all hiddenimports are listed in spec
+- Check `sqlcipher3` is installed
+- Verify frontend `dist/` folder exists
+
+### License verification fails
+- Regenerate license with current hardware ID
+- Check system clock is correct (monotonic guard)
+- Verify CLOUD_PUBLIC_KEY matches private key
