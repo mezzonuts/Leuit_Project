@@ -1045,6 +1045,8 @@ dev = [
 dev = [
     { name = "httpx" },
     { name = "mypy" },
+    { name = "pyarmor" },
+    { name = "pyinstaller" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -1092,6 +1094,8 @@ provides-extras = ["dev"]
 dev = [
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "mypy", specifier = ">=1.10.0" },
+    { name = "pyarmor", specifier = ">=8.5.0" },
+    { name = "pyinstaller", specifier = ">=6.5.0" },
     { name = "pytest", specifier = ">=8.2.0" },
     { name = "pytest-asyncio", specifier = ">=0.23.0" },
     { name = "pytest-cov", specifier = ">=5.0.0" },
