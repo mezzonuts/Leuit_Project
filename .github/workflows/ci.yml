@@ -185,11 +185,12 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
-      - name: Install SQLCipher system dependency
-        run: choco install sqlcipher -y
-
       - name: Install backend dependencies
         run: uv sync --frozen
+        working-directory: backend
+
+      - name: Verify SQLCipher
+        run: uv run python -c "import sqlcipher3; print(sqlcipher3.__file__)"
         working-directory: backend
 
       - name: Obfuscate security modules (PyArmor)
