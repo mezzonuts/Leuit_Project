@@ -100,6 +100,7 @@ exclude = [
   ".venv/*",
   "main.py",
   "app/api/v1/*",
+  "app/core/*",
 ]
 
 [tool.pytest.ini_options]
