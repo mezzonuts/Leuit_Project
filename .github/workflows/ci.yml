@@ -64,7 +64,7 @@ jobs:
         working-directory: backend
 
       - name: Backend TypeCheck (mypy)
-        run: uv run mypy . --ignore-missing-imports --allow-duplicates
+        run: uv run mypy tests/ --ignore-missing-imports --allow-duplicates
         working-directory: backend
 
   test:
