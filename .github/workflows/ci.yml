@@ -194,7 +194,7 @@ jobs:
         working-directory: backend
 
       - name: Obfuscate security modules (PyArmor)
-        run: uv run pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+        run: uv run pyarmor gen app/core/security/licensing.py app/core/security/hardware.py
         working-directory: backend
         continue-on-error: true
 
@@ -243,7 +243,7 @@ jobs:
         working-directory: backend
 
       - name: Obfuscate security modules (PyArmor)
-        run: uv run pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+        run: uv run pyarmor gen app/core/security/licensing.py app/core/security/hardware.py
         working-directory: backend
         continue-on-error: true
 
