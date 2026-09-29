@@ -98,6 +98,7 @@ exclude = [
   "build/*",
   "dist/*",
   ".venv/*",
+  "main.py",
 ]
 
 [tool.pytest.ini_options]
