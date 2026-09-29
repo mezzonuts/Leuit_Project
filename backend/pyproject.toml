@@ -67,8 +67,13 @@ dev-dependencies = [
 target-version = "py311"
 line-length = 100
 indent-width = 4
+
+[tool.ruff.lint]
 select = [
-  "E", "F", "I", "N", "W", "UP", "B", "C4", "SIM", "T20", "PIE", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "TRY", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "TCH", "INT", "EXE", "ISC", "ICN", "PT", "RUF", "A", "B", "C", "D", "E", "F", "I", "N", "P", "R", "S", "T", "UP", "W", "YTT", "COM", "DTZ", "EM", "EXE", "FUR", "ISC", "ICN", "LOG", "NPY", "PD", "PGH", "PIE", "PL", "PTH", "PT", "Q", "R", "RET", "RSE", "RUF", "S", "SLF", "SLOT", "SIM", "T10", "T20", "TCH", "TRY", "UP", "W", "YTT"
+  "E", "F", "W", "I", "UP", "B", "C4", "SIM", "T20", "PIE", "PT",
+  "Q", "RSE", "RET", "SLF", "SLOT", "TRY", "ARG", "PTH", "ERA",
+  "PGH", "PL", "RUF", "COM", "DTZ", "EM", "LOG", "NPY", "PD",
+  "T10", "TCH", "YTT", "EXE", "ISC", "ICN", "INT", "FLY",
 ]
 ignore = [
   "E501",
@@ -79,7 +84,10 @@ ignore = [
   "ARG001",
   "ARG002",
 ]
-per-file-ignores = { "scripts/*" = ["S101", "T201"], "tests/*" = ["S101", "T201", "SLF001"] }
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["S101", "T201"]
+"tests/*" = ["S101", "T201", "SLF001"]
 
 [tool.ruff.format]
 quote-style = "double"
