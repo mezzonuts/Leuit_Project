@@ -201,7 +201,7 @@ jobs:
       - name: Build binary (PyInstaller)
         run: |
           uv run pyinstaller --noconfirm --onedir --windowed `
-            --add-data "frontend/dist;dist" `
+            --add-data "../frontend/dist;dist" `
             --hidden-import "sqlcipher3" `
             --name "LeuitApp" `
             main.py
@@ -250,7 +250,7 @@ jobs:
       - name: Build binary (PyInstaller)
         run: |
           uv run pyinstaller --noconfirm --onedir --windowed \
-            --add-data "frontend/dist:dist" \
+            --add-data "../frontend/dist:dist" \
             --hidden-import "sqlcipher3" \
             --name "LeuitApp" \
             main.py
