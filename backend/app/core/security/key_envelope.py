@@ -1,53 +1,32 @@
 import os
 import secrets
 import hashlib
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from typing import Tuple, Optional
 import nacl.secret
 import nacl.utils
-import nacl.pwhash
 
-# Constants
-DEK_SIZE = 32  # 256-bit Data Encryption Key
+DEK_SIZE = 32
 SALT_SIZE = 16
-NONCE_SIZE = 12  # For AES-GCM
-ARGON2_TIME_COST = 3
-ARGON2_MEMORY_COST = 65536  # 64 MB
-ARGON2_PARALLELISM = 4
+NONCE_SIZE = 12
+PBKDF2_ITERATIONS = 100_000
 
 class KeyEnvelope:
     """
     Dual-Key Envelope Encryption for SQLCipher DEK.
-
-    The database is encrypted with a random DEK (Data Encryption Key).
-    The DEK is then encrypted twice:
-    1. Envelope A: Encrypted with Owner's passkey (Argon2id derived key)
+    The DEK is encrypted twice:
+    1. Envelope A: Encrypted with Owner's passkey (PBKDF2 derived key)
     2. Envelope B: Encrypted with Developer's Master Public Key (Sealed Box)
-
-    Either key can decrypt the DEK to unlock the database.
     """
 
     @staticmethod
     def generate_dek() -> bytes:
-        """Generate a new random Data Encryption Key."""
         return secrets.token_bytes(DEK_SIZE)
 
     @staticmethod
     def derive_owner_key(passkey: str, salt: bytes) -> bytes:
-        """
-        Derive encryption key from Owner's passkey using Argon2id.
-        """
-        kdf = Argon2id(
-            salt=salt,
-            length=DEK_SIZE,
-            iterations=ARGON2_TIME_COST,
-            memory=ARGON2_MEMORY_COST,
-            parallelism=ARGON2_PARALLELISM,
-        )
-        return kdf.derive(passkey.encode())
+        return hashlib.pbkdf2_hmac('sha256', passkey.encode(), salt, PBKDF2_ITERATIONS, dklen=DEK_SIZE)
 
     @staticmethod
     def encrypt_dek_for_owner(dek: bytes, passkey: str) -> Tuple[bytes, bytes]:
