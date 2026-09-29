@@ -93,7 +93,6 @@ no_implicit_optional = true
 strict_optional = true
 implicit_reexport = true
 allow_untyped_globals = false
-allow_duplicates = true
 exclude = [
   "scripts/*",
   "build/*",
