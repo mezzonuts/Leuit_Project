@@ -194,13 +194,13 @@ jobs:
         working-directory: backend
 
       - name: Obfuscate security modules (PyArmor)
-        run: pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+        run: uv run pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
         working-directory: backend
         continue-on-error: true
 
       - name: Build binary (PyInstaller)
         run: |
-          pyinstaller --noconfirm --onedir --windowed `
+          uv run pyinstaller --noconfirm --onedir --windowed `
             --add-data "frontend/dist;dist" `
             --hidden-import "sqlcipher3" `
             --name "LeuitApp" `
@@ -243,13 +243,13 @@ jobs:
         working-directory: backend
 
       - name: Obfuscate security modules (PyArmor)
-        run: pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
+        run: uv run pyarmor gen --exact app/core/security/licensing.py app/core/security/hardware.py
         working-directory: backend
         continue-on-error: true
 
       - name: Build binary (PyInstaller)
         run: |
-          pyinstaller --noconfirm --onedir --windowed \
+          uv run pyinstaller --noconfirm --onedir --windowed \
             --add-data "frontend/dist:dist" \
             --hidden-import "sqlcipher3" \
             --name "LeuitApp" \
