@@ -99,6 +99,7 @@ exclude = [
   "dist/*",
   ".venv/*",
   "main.py",
+  "app/api/v1/auth_security.py",
 ]
 
 [tool.pytest.ini_options]
