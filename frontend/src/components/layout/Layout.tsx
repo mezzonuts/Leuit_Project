@@ -1,6 +1,6 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useState } from 'react'
-import { Menu, X, ChevronLeft, ChevronRight, Shield, Package, ChefHat, ShoppingCart, RefreshCw, BarChart2, Settings } from 'lucide-react'
+import { Menu, ChevronLeft, ChevronRight, Shield, Package, ChefHat, ShoppingCart, RefreshCw, BarChart2 } from 'lucide-react'
 import { useUIStore } from '@/stores'
 import './Layout.css'
 
@@ -12,11 +12,15 @@ const navigation = [
   { name: 'Sinkronisasi', href: '/sync', icon: RefreshCw },
 ]
 
-export default function Layout() {
+interface LayoutProps {
+  children?: React.ReactNode
+}
+
+export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { activeDrawer, closeDrawer, isMobileMenuOpen: storeMobileOpen, toggleMobileMenu } = useUIStore()
+  const { activeDrawer, isMobileMenuOpen: storeMobileOpen, toggleMobileMenu } = useUIStore()
 
   const isDrawerOpen = activeDrawer !== null
 
@@ -129,14 +133,16 @@ export default function Layout() {
 
         {/* Page Content */}
         <div className="p-4 lg:p-6 pb-16">
-          <Outlet />
+          {children}
         </div>
       </main>
 
       {/* Slide-over Drawer */}
       {isDrawerOpen && (
         <div className="fixed inset-y-0 right-0 z-50 w-96 bg-white border-l border-gray-200 shadow-xl lg:static lg:shadow-none lg:border-0" aria-hidden="false">
-          <Outlet context={activeDrawer} />
+          <div className="p-4">
+            <p className="text-gray-500">Drawer content goes here</p>
+          </div>
         </div>
       )}
     </div>

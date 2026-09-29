@@ -1,12 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Plus, Search, Edit, Trash2, Camera, Download, RefreshCw, Package } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Camera, Download, Package } from 'lucide-react'
 import { api } from '@/services/api'
-import { formatRupiah, formatNumber, formatDate, getStockRatio, getStockStatus, getStockStatusColor, getStockProgressColor, daysUntilExpiry } from '@/utils/formatters'
+import { formatRupiah, formatNumber, getStockRatio, getStockStatus, getStockStatusColor, getStockProgressColor, daysUntilExpiry } from '@/utils/formatters'
 import { downloadValuationCSV } from '@/utils/exportCsv'
 import { useUIStore } from '@/stores'
 import IngredientDrawer from './IngredientDrawer'
-import StockOpnameModal from './StockOpnameModal'
 import BarcodeCameraModal from './BarcodeCameraModal'
 
 export default function Inventory() {
@@ -15,36 +14,14 @@ export default function Inventory() {
   const [search, setSearch] = useState('')
   const [showInactive, setShowInactive] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
-  const [cameraTarget, setCameraTarget] = useState<'form' | 'opname'>('form')
 
-  const { data: response, isLoading } = useQuery({
+  const { data: response } = useQuery({
     queryKey: ['ingredients', search, showInactive],
     queryFn: () => api.get('/inventory', { params: { search, active_only: !showInactive } }).then(res => res.data),
   })
 
-  const createMutation = useMutation({
-    mutationFn: (data: any) => api.post('/inventory', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      closeDrawer()
-    },
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => api.put(`/inventory/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      closeDrawer()
-    },
-  })
-
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.delete(`/inventory/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ingredients'] }),
-  })
-
-  const opnameMutation = useMutation({
-    mutationFn: ({ id, quantity }: { id: number; quantity: number }) => api.post(`/inventory/${id}/stock-opname`, { quantity }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ingredients'] }),
   })
 
@@ -199,7 +176,7 @@ export default function Inventory() {
                           <Package className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => { setCameraTarget('form'); setShowCamera(true) }}
+                          onClick={() => setShowCamera(true)}
                           className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                           title="Scan Barcode"
                         >

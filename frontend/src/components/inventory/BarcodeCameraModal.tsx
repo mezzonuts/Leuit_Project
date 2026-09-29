@@ -10,13 +10,11 @@ export default function BarcodeCameraModal({ onClose, onScan }: BarcodeCameraMod
   const videoRef = useRef<HTMLVideoElement>(null)
   const [hasPermission, setHasPermission] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [scanning, setScanning] = useState(false)
-  const scanTimeoutRef = useRef<NodeJS.Timeout>()
+  const scanTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     const initCamera = async () => {
       try {
-        setScanning(true)
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
         })
@@ -24,12 +22,10 @@ export default function BarcodeCameraModal({ onClose, onScan }: BarcodeCameraMod
           videoRef.current.srcObject = stream
           await videoRef.current.play()
           setHasPermission(true)
-          setScanning(false)
           startScanning()
         }
       } catch (err) {
         setError('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.')
-        setScanning(false)
       }
     }
 

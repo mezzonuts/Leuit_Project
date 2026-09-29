@@ -26,7 +26,7 @@ export const useSecurityStore = create<SecurityStore>()(
 )
 
 interface UIStoreState extends UIState {
-  openDrawer: (type: DrawerType, data?: unknown) => void
+  openDrawer: (type: DrawerType, data?: Record<string, any> | null) => void
   closeDrawer: () => void
   toggleMobileMenu: () => void
   setLicenseGraceDays: (days: number | null) => void
@@ -36,7 +36,7 @@ export const useUIStore = create<UIStoreState>()(
   persist(
     (set) => ({
       activeDrawer: null,
-      drawerData: null,
+      drawerData: null as Record<string, any> | null,
       isMobileMenuOpen: false,
       licenseGraceDays: null,
       openDrawer: (type, data = null) => set({ activeDrawer: type, drawerData: data }),

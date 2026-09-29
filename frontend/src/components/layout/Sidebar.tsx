@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { useState } from 'react'
-import { Menu, X, ChevronLeft, ChevronRight, Shield, Package, ChefHat, ShoppingCart, RefreshCw, BarChart2 } from 'lucide-react'
+import { Shield, Package, ChefHat, ShoppingCart, RefreshCw, BarChart2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart2 },

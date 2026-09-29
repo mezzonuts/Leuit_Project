@@ -1,7 +1,7 @@
-import { X, Upload, FileText, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
-import { useUIStore } from '@/stores'
+import { useState, useRef } from 'react'
+import { X, Upload, FileText, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react'
 import { api } from '@/services/api'
-import { formatDate, formatNumber } from '@/utils/formatters'
+import { formatDate } from '@/utils/formatters'
 import { cn } from '@/utils/formatters'
 
 interface PosSyncDrawerProps {
