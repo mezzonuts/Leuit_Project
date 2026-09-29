@@ -258,7 +258,7 @@ jobs:
 
       - name: Create DMG
         run: |
-          hdiutil create -volname "LeuitApp" -srcfolder backend/dist/LeuitApp -ov -format UDZO LeuitApp-macos.dmg
+          hdiutil create -volname "LeuitApp" -srcfolder dist/LeuitApp -ov -format UDZO LeuitApp-macos.dmg
         working-directory: backend
 
       - name: Upload macOS binary
