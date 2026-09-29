@@ -3,16 +3,14 @@ import secrets
 import hashlib
 import time
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives.asymmetric import ed25519
-from typing import Tuple, Optional
-import nacl.secret
-import nacl.utils
-import nacl.public
+from nacl.public import PrivateKey, PublicKey, SealedBox
+from typing import Tuple
 
 DEK_SIZE = 32
 SALT_SIZE = 16
 NONCE_SIZE = 12
 PBKDF2_ITERATIONS = 100_000
+
 
 class KeyEnvelope:
     """
@@ -70,30 +68,27 @@ class KeyEnvelope:
             raise ValueError("Invalid passkey or corrupted data")
 
     @staticmethod
-    def encrypt_dek_for_developer(dek: bytes, dev_public_key: ed25519.Ed25519PublicKey) -> bytes:
+    def encrypt_dek_for_developer(dek: bytes, dev_public_key: PublicKey) -> bytes:
         """
         Encrypt DEK with Developer's Master Public Key using Sealed Box (anonymous encryption).
         Returns encrypted DEK package.
         """
-        # Use NaCl sealed box for anonymous public key encryption
-        sealed_box = nacl.public.SealedBox(dev_public_key)
-        encrypted = sealed_box.encrypt(dek)
-        return encrypted
+        sealed_box = SealedBox(dev_public_key)
+        return sealed_box.encrypt(dek)
 
     @staticmethod
-    def decrypt_dek_for_developer(encrypted_package: bytes, dev_private_key: ed25519.Ed25519PrivateKey) -> bytes:
+    def decrypt_dek_for_developer(encrypted_package: bytes, dev_private_key: PrivateKey) -> bytes:
         """
         Decrypt DEK using Developer's Master Private Key.
         """
-        sealed_box = nacl.public.SealedBox(dev_private_key)
+        sealed_box = SealedBox(dev_private_key)
         try:
-            dek = sealed_box.decrypt(encrypted_package)
-            return dek
-        except Exception:
-            raise ValueError("Invalid developer key or corrupted data")
+            return sealed_box.decrypt(encrypted_package)
+        except Exception as exc:
+            raise ValueError("Invalid developer key or corrupted data") from exc
 
     @staticmethod
-    def create_envelope(dek: bytes, owner_passkey: str, dev_public_key: ed25519.Ed25519PublicKey) -> dict:
+    def create_envelope(dek: bytes, owner_passkey: str, dev_public_key: PublicKey) -> dict:
         """
         Create dual-key envelope for DEK.
         Returns dict with both encrypted envelopes.
@@ -119,10 +114,11 @@ class KeyEnvelope:
         return KeyEnvelope.decrypt_dek_for_owner(encrypted_package, owner_passkey)
 
     @staticmethod
-    def open_envelope_developer(envelope: dict, dev_private_key: ed25519.Ed25519PrivateKey) -> bytes:
+    def open_envelope_developer(envelope: dict, dev_private_key: PrivateKey) -> bytes:
         """Open envelope using Developer's private key."""
         encrypted_package = bytes.fromhex(envelope["encrypted_dek_developer"])
         return KeyEnvelope.decrypt_dek_for_developer(encrypted_package, dev_private_key)
+
 
 # SQLCipher-specific key derivation
 def derive_sqlcipher_key(dek: bytes, iterations: int = 256000) -> str:
@@ -137,10 +133,11 @@ def derive_sqlcipher_key(dek: bytes, iterations: int = 256000) -> str:
     # We use the DEK directly as the raw key material
     return dek.hex()
 
+
 def generate_key_rotation_package(
     old_dek: bytes,
     new_owner_passkey: str,
-    dev_public_key: ed25519.Ed25519PublicKey
+    dev_public_key: PublicKey
 ) -> dict:
     """Generate new envelope for key rotation."""
     new_dek = KeyEnvelope.generate_dek()

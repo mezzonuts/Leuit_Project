@@ -56,7 +56,7 @@ class LicenseData:
             metadata=data.get("metadata"),
         )
 
-def verify_license_signature(token_bytes: bytes, signature_bytes: bytes) -> Optional[LicenseData]:
+def verify_license_signature(token_bytes: bytes, signature_bytes: bytes) -> LicenseData:
     """
     Verify Ed25519 signature of license token.
     Returns LicenseData if valid, raises SecurityException if invalid.
@@ -151,9 +151,6 @@ def verify_license_token(
     """
     # 1. Verify cryptographic signature
     license_data = verify_license_signature(token_bytes, signature_bytes)
-
-    if license_data is None:
-        raise SecurityException("Failed to verify license signature")
 
     # 2. Verify hardware binding
     if not check_hardware_binding(license_data):
