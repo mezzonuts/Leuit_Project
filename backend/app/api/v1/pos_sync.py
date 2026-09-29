@@ -1,25 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, desc
-from typing import Optional, List
-import pandas as pd
-import io
 import hashlib
-import json
-from datetime import datetime, timezone
-from app.models.menu import MenuItem
+import io
+from datetime import UTC, datetime
+
+import pandas as pd
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_db, verify_license
+from app.models.ingredient import Ingredient
+from app.models.menu import MenuItem, RecipeItem
+from app.models.transaction import IngredientDailyUsage, PosSyncLog, SalesTransaction
 from app.schemas.sync_schema import (
-    PosSyncUploadResponse,
     PosSyncHistoryItem,
     PosSyncHistoryResponse,
+    PosSyncUploadResponse,
 )
-from app.schemas.ingredient_schema import IngredientResponse
-from app.models.transaction import SalesTransaction, PosSyncLog, IngredientDailyUsage
-from app.models.ingredient import Ingredient
-from app.models.menu import RecipeItem
-from app.core.config import settings
 
 router = APIRouter(prefix="/sync", tags=["POS Sync"])
 
@@ -150,7 +146,7 @@ async def upload_pos_csv(
                 ingredient.current_stock = max(0.0, float(ingredient.current_stock) - deduct_qty)
 
                 # Record daily usage
-                today = datetime.now(timezone.utc).date()
+                today = datetime.now(UTC).date()
                 daily_usage = db.query(IngredientDailyUsage).filter(
                     IngredientDailyUsage.usage_date == today,
                     IngredientDailyUsage.ingredient_id == ing_id
@@ -160,7 +156,7 @@ async def upload_pos_csv(
                     daily_usage.total_quantity_used += deduct_qty
                 else:
                     daily_usage = IngredientDailyUsage(
-                        usage_date=datetime.combine(today, datetime.min.time()).replace(tzinfo=timezone.utc),
+                        usage_date=datetime.combine(today, datetime.min.time()).replace(tzinfo=UTC),
                         ingredient_id=ing_id,
                         total_quantity_used=deduct_qty,
                     )

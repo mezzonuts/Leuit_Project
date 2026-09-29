@@ -1,10 +1,9 @@
-import os
-import secrets
 import hashlib
+import secrets
 import time
+
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from nacl.public import PrivateKey, PublicKey, SealedBox
-from typing import Tuple
 
 DEK_SIZE = 32
 SALT_SIZE = 16
@@ -29,7 +28,7 @@ class KeyEnvelope:
         return hashlib.pbkdf2_hmac('sha256', passkey.encode(), salt, PBKDF2_ITERATIONS, dklen=DEK_SIZE)
 
     @staticmethod
-    def encrypt_dek_for_owner(dek: bytes, passkey: str) -> Tuple[bytes, bytes]:
+    def encrypt_dek_for_owner(dek: bytes, passkey: str) -> tuple[bytes, bytes]:
         """
         Encrypt DEK with Owner's passkey.
         Returns (encrypted_dek, salt).
@@ -126,8 +125,6 @@ def derive_sqlcipher_key(dek: bytes, iterations: int = 256000) -> str:
     Derive SQLCipher-compatible key from DEK.
     SQLCipher uses PBKDF2-HMAC-SHA256 with specified iterations.
     """
-    import hashlib
-    import binascii
 
     # SQLCipher expects the key as hex string
     # We use the DEK directly as the raw key material

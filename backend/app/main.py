@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 
 from app.api.v1 import api_router
 from app.core.config import settings
-from app.core.database import Base
+from app.core.database import _engine
+
 
 # Lifespan handler
 @asynccontextmanager
@@ -38,6 +40,28 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# DB Lock Guard Middleware — blocks protected endpoints when DB is locked
+PROTECTED_PREFIXES = (
+    "/api/v1/inventory",
+    "/api/v1/bom",
+    "/api/v1/purchases",
+    "/api/v1/forecast",
+    "/api/v1/sync",
+)
+
+@app.middleware("http")
+async def db_lock_guard(request: Request, call_next):
+    """Return 423 if database engine not initialized for protected routes."""
+    path = request.url.path
+    if any(path.startswith(prefix) for prefix in PROTECTED_PREFIXES):
+        if _engine is None:
+            return JSONResponse(
+                status_code=423,
+                content={"detail": "Database is locked. Please unlock the database first."},
+            )
+    response = await call_next(request)
+    return response
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")

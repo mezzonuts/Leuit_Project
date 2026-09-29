@@ -1,19 +1,26 @@
-from sqlalchemy import create_engine, event, text
-from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
-from sqlalchemy.pool import StaticPool
-from sqlalchemy.engine import Engine
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator, Optional, Any
-import os
+from typing import Any
+
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.core.config import settings
+
+
+def _escape_pragma_key(key: str) -> str:
+    """Escape key value safe PRAGMA execution. Prevents SQL injection."""
+    return key.replace("'", "''")
+
 
 # Base class for models
 class Base(DeclarativeBase):
     pass
 
 # Global engine variable (initialized after unlock)
-_engine: Optional[Engine] = None
+_engine: Engine | None = None
 _SessionLocal: Any = None
 
 
@@ -27,6 +34,12 @@ def get_database_url(encryption_key: str) -> str:
 def init_database(encryption_key: str) -> None:
     """Initialize database engine with encryption key."""
     global _engine, _SessionLocal
+
+    # Dispose existing engine to avoid resource leak
+    if _engine is not None:
+        _engine.dispose()
+        _engine = None
+        _SessionLocal = None
 
     database_url = get_database_url(encryption_key)
 
@@ -44,7 +57,7 @@ def init_database(encryption_key: str) -> None:
     @event.listens_for(_engine, "connect")
     def set_pragma_key(dbapi_connection: Any, connection_record: Any) -> None:
         cursor = dbapi_connection.cursor()
-        cursor.execute(f"PRAGMA key = '{encryption_key}';")
+        cursor.execute(f"PRAGMA key = '{_escape_pragma_key(encryption_key)}';")
         cursor.execute("PRAGMA cipher_compatibility = 4;")
         cursor.execute("PRAGMA cipher_page_size = 4096;")
         cursor.execute("PRAGMA kdf_iter = 256000;")
@@ -111,12 +124,17 @@ def verify_database_key(encryption_key: str) -> bool:
         @event.listens_for(test_engine, "connect")
         def set_test_key(dbapi_connection: Any, connection_record: Any) -> None:
             cursor = dbapi_connection.cursor()
-            cursor.execute(f"PRAGMA key = '{encryption_key}';")
+            cursor.execute(f"PRAGMA key = '{_escape_pragma_key(encryption_key)}';")
             cursor.execute("PRAGMA cipher_compatibility = 4;")
             cursor.close()
 
         with test_engine.connect() as conn:
             conn.execute(text("SELECT 1;"))
+            # Verify database integrity
+            result = conn.execute(text("PRAGMA quick_check;")).scalar()
+            if result != "ok":
+                test_engine.dispose()
+                return False
 
         test_engine.dispose()
         return True
@@ -126,12 +144,14 @@ def verify_database_key(encryption_key: str) -> bool:
 
 def change_encryption_key(old_key: str, new_key: str) -> bool:
     """Change database encryption key (rekey)."""
+    if old_key == new_key:
+        return False  # No-op, keys are the same
     try:
         # Initialize with old key first
         init_database(old_key)
 
         with session_scope() as db:
-            db.execute(text(f"PRAGMA rekey = '{new_key}';"))
+            db.execute(text(f"PRAGMA rekey = '{_escape_pragma_key(new_key)}';"))
 
         # Re-initialize with new key
         init_database(new_key)
@@ -143,10 +163,12 @@ def change_encryption_key(old_key: str, new_key: str) -> bool:
 def backup_database(backup_path: str, encryption_key: str) -> bool:
     """Create encrypted backup of database."""
     try:
-        init_database(encryption_key)
+        # Use existing engine if available, otherwise init
+        if _engine is None:
+            init_database(encryption_key)
 
         with session_scope() as db:
-            db.execute(text(f"BACKUP TO '{backup_path}';"))
+            db.execute(text(f"BACKUP TO '{_escape_pragma_key(backup_path)}';"))
 
         return True
     except Exception:

@@ -1,8 +1,9 @@
 import hashlib
-import subprocess
 import platform
+import subprocess
 import uuid
 from functools import lru_cache
+
 
 @lru_cache(maxsize=1)
 def get_machine_fingerprint() -> str:
@@ -47,11 +48,11 @@ def get_machine_fingerprint() -> str:
 
         else:  # Linux
             try:
-                with open("/etc/machine-id", "r") as f:
+                with open("/etc/machine-id") as f:
                     raw_id = f.read().strip()
             except FileNotFoundError:
                 # Fallback to CPU info
-                with open("/proc/cpuinfo", "r") as f:
+                with open("/proc/cpuinfo") as f:
                     for line in f:
                         if line.startswith("Serial"):
                             raw_id = line.split(":")[1].strip()

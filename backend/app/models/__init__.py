@@ -1,10 +1,10 @@
 # Models package exports
 from app.models.ingredient import Ingredient
-from app.models.supplier import Supplier
 from app.models.menu import MenuItem, RecipeItem
-from app.models.transaction import SalesTransaction, PosSyncLog, IngredientDailyUsage
-from app.models.purchase import InventoryPurchase, PaymentMethod, PaymentStatus, OperationalAuditLog
-from app.models.security import SecurityKeyring, SecurityAuditClock, AppLicense
+from app.models.purchase import InventoryPurchase, OperationalAuditLog, PaymentMethod, PaymentStatus
+from app.models.security import AppLicense, SecurityAuditClock, SecurityKeyring, SecurityUnlockAudit
+from app.models.supplier import Supplier
+from app.models.transaction import IngredientDailyUsage, PosSyncLog, SalesTransaction
 
 __all__ = [
     "Ingredient",
@@ -21,4 +21,5 @@ __all__ = [
     "SecurityKeyring",
     "SecurityAuditClock",
     "AppLicense",
+    "SecurityUnlockAudit",
 ]

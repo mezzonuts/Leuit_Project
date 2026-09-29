@@ -2,11 +2,11 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     auth_security,
+    bom,
+    forecast,
     inventory,
     pos_sync,
-    bom,
     purchases,
-    forecast,
 )
 
 api_router = APIRouter()

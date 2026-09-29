@@ -3,11 +3,12 @@
 Build script for LEUIT Desktop App.
 Handles PyArmor obfuscation and PyInstaller packaging.
 """
-import subprocess
-import sys
 import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
+
 
 def run_command(cmd, cwd=None, env=None):
     """Run command and return success status."""

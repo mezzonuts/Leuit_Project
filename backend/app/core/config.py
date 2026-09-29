@@ -1,7 +1,8 @@
-from pydantic_settings import BaseSettings
-from pydantic import Field
-from typing import Optional
 import os
+
+from pydantic import Field
+from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     # App
@@ -12,14 +13,18 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_PATH: str = "./leuit_store.enc"
-    DATABASE_KEY: Optional[str] = None  # Set at runtime after unlock
+    DATABASE_KEY: str | None = None  # Set at runtime after unlock
 
     # Security
-    CLOUD_PUBLIC_KEY_HEX: str = Field(default="b12064c14d537f0369b82f09028553df659c536e9871564189bc7669114b15f2", description="Ed25519 public key for license verification")
-    DEVICE_FINGERPRINT: Optional[str] = None
+    CLOUD_PUBLIC_KEY_HEX: str = Field(default="", description="Ed25519 public key hex for license verification")
+    DEV_PRIVATE_KEY_HEX: str = Field(default="", description="Ed25519 private key hex for developer recovery")
+    PUBLIC_KEY_PATH: str = Field(default="backend/dev_public_key.hex", description="Path to developer public key file")
+    DEV_PRIVATE_KEY_PATH: str = Field(default="backend/dev_private_key.hex", description="Path to developer private key file")
+    DEVICE_FINGERPRINT: str | None = None
 
     # License
     LICENSE_FILE_PATH: str = os.path.expanduser("~/.leuit/license.key")
+    LICENSE_INIT_VALID_DAYS: int = 365
     GRACE_PERIOD_DAYS: int = 3
 
     # BMKG Weather API

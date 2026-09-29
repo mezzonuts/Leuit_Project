@@ -1,27 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from typing import Optional, List
 
 from app.api.v1.deps import get_db, verify_license
+from app.models.ingredient import Ingredient
+from app.models.menu import MenuItem, RecipeItem
 from app.schemas.bom_schema import (
     MenuItemCreate,
-    MenuItemUpdate,
     MenuItemResponse,
-    MenuWithRecipesResponse,
+    MenuItemUpdate,
     MenuListResponse,
+    MenuWithRecipesResponse,
     RecipeItemCreate,
-    RecipeItemUpdate,
     RecipeItemResponse,
+    RecipeItemUpdate,
     RecipeListResponse,
 )
 from app.schemas.forecast_schema import (
+    RecipeScalerItemResponse,
     RecipeScalerRequest,
     RecipeScalerResponse,
-    RecipeScalerItemResponse,
 )
-from app.models.menu import MenuItem, RecipeItem
-from app.models.ingredient import Ingredient
 
 router = APIRouter(prefix="/bom", tags=["BOM & Recipe"])
 
@@ -32,10 +31,10 @@ def list_menus(
     license_info: dict = Depends(verify_license),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    search: Optional[str] = Query(None),
+    search: str | None = Query(None),
 ):
     """List all menu items."""
-    query = db.query(MenuItem).filter(MenuItem.is_active == True)
+    query = db.query(MenuItem).filter(MenuItem.is_active)
 
     if search:
         search_term = f"%{search}%"

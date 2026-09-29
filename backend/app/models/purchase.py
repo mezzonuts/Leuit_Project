@@ -1,15 +1,19 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey, Index, Enum as SQLEnum
+import enum
+from datetime import UTC
+
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
 
 from app.core.database import Base
 
-class PaymentMethod(str, enum.Enum):
+
+class PaymentMethod(enum.StrEnum):
     CASH = "CASH"
     CREDIT = "CREDIT"
 
-class PaymentStatus(str, enum.Enum):
+class PaymentStatus(enum.StrEnum):
     PAID = "PAID"
     UNPAID = "UNPAID"
 
@@ -44,15 +48,15 @@ class InventoryPurchase(Base):
     @property
     def is_overdue(self) -> bool:
         if self.payment_status == PaymentStatus.UNPAID and self.due_date:
-            from datetime import datetime, timezone
-            return datetime.now(timezone.utc) > self.due_date
+            from datetime import datetime
+            return datetime.now(UTC) > self.due_date
         return False
 
     @property
     def days_until_due(self) -> int:
         if self.due_date and self.payment_status == PaymentStatus.UNPAID:
-            from datetime import datetime, timezone
-            delta = self.due_date - datetime.now(timezone.utc)
+            from datetime import datetime
+            delta = self.due_date - datetime.now(UTC)
             return max(0, delta.days)
         return 0
 

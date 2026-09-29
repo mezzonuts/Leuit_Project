@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey, Index
+from sqlalchemy import Boolean, Column, DateTime, Index, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
+
 
 class Ingredient(Base):
     __tablename__ = "ingredients"

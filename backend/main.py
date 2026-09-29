@@ -4,12 +4,12 @@ LEUIT Desktop Launcher
 Starts FastAPI backend and opens browser to frontend.
 """
 import sys
-import os
 import threading
 import time
 import webbrowser
-import uvicorn
 from pathlib import Path
+
+import uvicorn
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))

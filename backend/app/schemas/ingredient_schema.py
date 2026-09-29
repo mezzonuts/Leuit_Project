@@ -1,10 +1,11 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
 
 # Ingredient schemas
 class IngredientBase(BaseModel):
-    barcode_sku: Optional[str] = Field(None, max_length=100)
+    barcode_sku: str | None = Field(None, max_length=100)
     name: str = Field(..., min_length=1, max_length=255)
     unit: str = Field(..., pattern="^(ml|gram|pcs)$")
     cost_per_unit: float = Field(..., ge=0)
@@ -17,15 +18,15 @@ class IngredientCreate(IngredientBase):
     pass
 
 class IngredientUpdate(BaseModel):
-    barcode_sku: Optional[str] = Field(None, max_length=100)
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    unit: Optional[str] = Field(None, pattern="^(ml|gram|pcs)$")
-    cost_per_unit: Optional[float] = Field(None, ge=0)
-    shelf_life_days: Optional[int] = Field(None, ge=1)
-    current_stock: Optional[float] = Field(None, ge=0)
-    min_stock_threshold: Optional[float] = Field(None, ge=0)
-    lead_time_days: Optional[int] = Field(None, ge=0)
-    is_active: Optional[bool] = None
+    barcode_sku: str | None = Field(None, max_length=100)
+    name: str | None = Field(None, min_length=1, max_length=255)
+    unit: str | None = Field(None, pattern="^(ml|gram|pcs)$")
+    cost_per_unit: float | None = Field(None, ge=0)
+    shelf_life_days: int | None = Field(None, ge=1)
+    current_stock: float | None = Field(None, ge=0)
+    min_stock_threshold: float | None = Field(None, ge=0)
+    lead_time_days: int | None = Field(None, ge=0)
+    is_active: bool | None = None
 
 class IngredientResponse(IngredientBase):
     id: int
@@ -68,7 +69,7 @@ class ValuationSummary(BaseModel):
 class ValuationItem(BaseModel):
     id: int
     name: str
-    barcode_sku: Optional[str]
+    barcode_sku: str | None
     current_stock: float
     unit: str
     cost_per_unit: float

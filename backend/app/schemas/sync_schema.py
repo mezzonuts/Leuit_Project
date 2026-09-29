@@ -1,13 +1,14 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 # POS Sync schemas
 class PosSyncUploadResponse(BaseModel):
     status: str
     new_inserted: int
     duplicates_skipped: int
-    message: Optional[str] = None
+    message: str | None = None
 
 class PosSyncHistoryItem(BaseModel):
     id: int
@@ -16,12 +17,12 @@ class PosSyncHistoryItem(BaseModel):
     total_rows_read: int
     new_rows_inserted: int
     duplicate_rows_skipped: int
-    date_range_start: Optional[datetime] = None
-    date_range_end: Optional[datetime] = None
+    date_range_start: datetime | None = None
+    date_range_end: datetime | None = None
     reconciled_stock_items: int
 
 class PosSyncHistoryResponse(BaseModel):
-    items: List[PosSyncHistoryItem]
+    items: list[PosSyncHistoryItem]
     total: int
     page: int
     page_size: int
@@ -34,7 +35,7 @@ class PosSyncDetailResponse(BaseModel):
     total_rows_read: int
     new_rows_inserted: int
     duplicate_rows_skipped: int
-    date_range_start: Optional[datetime]
-    date_range_end: Optional[datetime]
+    date_range_start: datetime | None
+    date_range_end: datetime | None
     reconciled_stock_items: int
-    new_transactions: List[dict]  # Simplified for response
+    new_transactions: list[dict]  # Simplified for response
