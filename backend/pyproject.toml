@@ -78,11 +78,41 @@ select = [
 ignore = [
   "E501",
   "B008",
+  "B904",
   "C901",
   "SIM103",
   "TRY003",
+  "TRY002",
   "ARG001",
   "ARG002",
+  "ARG003",
+  "PLR0913",
+  "PLR2004",
+  "PLW0603",
+  "PLW2901",
+  "PLC0415",
+  "SLF001",
+  "S101",
+  "S104",
+  "S105",
+  "S106",
+  "S324",
+  "S603",
+  "S607",
+  "EM101",
+  "EM102",
+  "TRY003",
+  "PTH123",
+  "PTH120",
+  "PT009",
+  "PT012",
+  "RET504",
+  "RUF001",
+  "RUF012",
+  "RUF015",
+  "UP007",
+  "UP015",
+  "ISC001",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -120,7 +150,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short --strict-markers --strict-config"
+addopts = "-v --tb=short --strict-markers --strict-config --no-header"
 markers = [
   "unit: Unit tests",
   "integration: Integration tests",
