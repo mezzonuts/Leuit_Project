@@ -35,3 +35,4 @@ leuit_backend.egg-info/SOURCES.txt
 leuit_backend.egg-info/dependency_links.txt
 leuit_backend.egg-info/requires.txt
 leuit_backend.egg-info/top_level.txt
+tests/test_smoke.py

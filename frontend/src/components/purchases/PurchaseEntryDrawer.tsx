@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect } from 'react'
-import { X, Save, Loader2, Calendar, CreditCard, DollarSign } from 'lucide-react'
+import { X, Save, Loader2, Calendar } from 'lucide-react'
 import { useUIStore } from '@/stores'
 import { api } from '@/services/api'
 import { cn, formatRupiah } from '@/utils/formatters'
@@ -35,7 +35,6 @@ export default function PurchaseEntryDrawer({ onClose }: PurchaseEntryDrawerProp
     handleSubmit,
     watch,
     setValue,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<PurchaseFormSchema>({
     resolver: zodResolver(purchaseSchema),
@@ -52,7 +51,6 @@ export default function PurchaseEntryDrawer({ onClose }: PurchaseEntryDrawerProp
   })
 
   const paymentMethod = watch('payment_method')
-  const paymentStatus = watch('payment_status')
 
   useEffect(() => {
     if (paymentMethod === 'CREDIT') {

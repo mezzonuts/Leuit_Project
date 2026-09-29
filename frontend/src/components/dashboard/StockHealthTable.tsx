@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { formatRupiah, formatNumber, getStockRatio, getStockStatus, getStockStatusColor, getStockProgressColor, daysUntilExpiry } from '@/utils/formatters'
+import { formatNumber, getStockRatio, getStockStatus, getStockStatusColor, getStockProgressColor, daysUntilExpiry } from '@/utils/formatters'
 import type { StockHealthItem } from '@/types'
 
 interface StockHealthTableProps {

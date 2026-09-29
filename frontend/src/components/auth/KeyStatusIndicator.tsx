@@ -1,4 +1,4 @@
-import { Lock, Unlock, Shield, AlertTriangle, Clock } from 'lucide-react'
+import { Lock, Unlock, Shield, Clock } from 'lucide-react'
 import { useSecurityStore } from '@/stores'
 
 export default function KeyStatusIndicator() {

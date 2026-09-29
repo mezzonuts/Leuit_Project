@@ -2,11 +2,11 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect } from 'react'
-import { X, Save, Loader2, Plus, Trash2, Minus } from 'lucide-react'
+import { X, Save, Loader2, Plus, Minus } from 'lucide-react'
 import { useUIStore } from '@/stores'
 import { api } from '@/services/api'
 import { cn, formatRupiah } from '@/utils/formatters'
-import type { Ingredient, MenuItem } from '@/types'
+import type { Ingredient } from '@/types'
 
 const recipeItemSchema = z.object({
   ingredient_id: z.number().min(1, 'Pilih bahan baku'),
@@ -37,7 +37,6 @@ export default function RecipeDrawer({ onClose }: RecipeDrawerProps) {
     control,
     handleSubmit,
     watch,
-    setValue,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<MenuFormSchema>({

@@ -23,7 +23,7 @@ export default function StockOpnameModal({ onClose }: StockOpnameModalProps) {
   const {
     register,
     handleSubmit,
-    reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<OpnameFormSchema>({
     resolver: zodResolver(opnameSchema),
@@ -73,7 +73,7 @@ export default function StockOpnameModal({ onClose }: StockOpnameModalProps) {
 
           <div className="bg-gray-50 rounded-lg p-3 text-sm">
             <p className="text-gray-600">Stok sistem: <span className="font-medium">{formatNumber(ingredient.current_stock)}</span> {ingredient.unit}</p>
-            <p className="text-gray-600">Stok fisik: <span className="font-medium">{form.watch('quantity') || 0}</span> {ingredient.unit}</p>
+            <p className="text-gray-600">Stok fisik: <span className="font-medium">{watch('quantity') || 0}</span> {ingredient.unit}</p>
             <p className="font-medium text-gray-900">Selisih: <span className={difference > 0 ? 'text-danger-600' : difference < 0 ? 'text-green-600' : 'text-gray-600'}>{difference > 0 ? '+' : ''}{difference} {ingredient.unit}</span></p>
           </div>
 

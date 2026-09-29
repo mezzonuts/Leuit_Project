@@ -6,7 +6,6 @@ import { X, Save, Loader2, Camera } from 'lucide-react'
 import { useUIStore } from '@/stores'
 import { api } from '@/services/api'
 import { cn } from '@/utils/formatters'
-import type { IngredientFormData } from '@/types'
 
 const ingredientSchema = z.object({
   barcode_sku: z.string().optional(),
@@ -34,7 +33,6 @@ export default function IngredientDrawer({ onClose }: IngredientDrawerProps) {
   const {
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<IngredientFormSchema>({

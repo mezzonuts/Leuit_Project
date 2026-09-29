@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.engine import Engine
 from contextlib import contextmanager
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 import os
 
 from app.core.config import settings
@@ -12,14 +13,16 @@ class Base(DeclarativeBase):
     pass
 
 # Global engine variable (initialized after unlock)
-_engine = None
-_SessionLocal = None
+_engine: Optional[Engine] = None
+_SessionLocal: Any = None
+
 
 def get_database_url(encryption_key: str) -> str:
     """Generate SQLite connection URL with SQLCipher encryption."""
     # For SQLCipher with pysqlcipher3, we use the file path and set PRAGMA key after connection
     db_path = settings.DATABASE_PATH
     return f"sqlite+pysqlcipher:///{db_path}"
+
 
 def init_database(encryption_key: str) -> None:
     """Initialize database engine with encryption key."""
@@ -39,7 +42,7 @@ def init_database(encryption_key: str) -> None:
 
     # Set encryption key on connect
     @event.listens_for(_engine, "connect")
-    def set_pragma_key(dbapi_connection, connection_record):
+    def set_pragma_key(dbapi_connection: Any, connection_record: Any) -> None:
         cursor = dbapi_connection.cursor()
         cursor.execute(f"PRAGMA key = '{encryption_key}';")
         cursor.execute("PRAGMA cipher_compatibility = 4;")
@@ -49,7 +52,7 @@ def init_database(encryption_key: str) -> None:
 
     # Enable foreign keys
     @event.listens_for(_engine, "connect")
-    def set_foreign_keys(dbapi_connection, connection_record):
+    def set_foreign_keys(dbapi_connection: Any, connection_record: Any) -> None:
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys = ON;")
         cursor.close()
@@ -59,11 +62,13 @@ def init_database(encryption_key: str) -> None:
     # Create tables
     Base.metadata.create_all(bind=_engine)
 
-def get_engine():
+
+def get_engine() -> Engine:
     """Get the current engine instance."""
     if _engine is None:
         raise RuntimeError("Database not initialized. Call init_database() first.")
     return _engine
+
 
 def get_session() -> Generator[Session, None, None]:
     """Dependency for FastAPI to get DB session."""
@@ -75,6 +80,7 @@ def get_session() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
 
 @contextmanager
 def session_scope() -> Generator[Session, None, None]:
@@ -92,6 +98,7 @@ def session_scope() -> Generator[Session, None, None]:
     finally:
         db.close()
 
+
 def verify_database_key(encryption_key: str) -> bool:
     """Verify if the encryption key can open the database."""
     try:
@@ -102,7 +109,7 @@ def verify_database_key(encryption_key: str) -> bool:
         )
 
         @event.listens_for(test_engine, "connect")
-        def set_test_key(dbapi_connection, connection_record):
+        def set_test_key(dbapi_connection: Any, connection_record: Any) -> None:
             cursor = dbapi_connection.cursor()
             cursor.execute(f"PRAGMA key = '{encryption_key}';")
             cursor.execute("PRAGMA cipher_compatibility = 4;")
@@ -115,6 +122,7 @@ def verify_database_key(encryption_key: str) -> bool:
         return True
     except Exception:
         return False
+
 
 def change_encryption_key(old_key: str, new_key: str) -> bool:
     """Change database encryption key (rekey)."""
@@ -130,6 +138,7 @@ def change_encryption_key(old_key: str, new_key: str) -> bool:
         return True
     except Exception:
         return False
+
 
 def backup_database(backup_path: str, encryption_key: str) -> bool:
     """Create encrypted backup of database."""

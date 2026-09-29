@@ -245,7 +245,7 @@ export type DrawerType = 'ingredient' | 'recipe' | 'purchase' | 'sync' | null;
 
 export interface UIState {
   activeDrawer: DrawerType;
-  drawerData: unknown | null;
+  drawerData: Record<string, any> | null;
   isMobileMenuOpen: boolean;
   licenseGraceDays: number | null;
 }

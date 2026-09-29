@@ -56,10 +56,10 @@ class LicenseData:
             metadata=data.get("metadata"),
         )
 
-def verify_license_signature(token_bytes: bytes, signature_bytes: bytes) -> Optional[LicenseData]:
+def verify_license_signature(token_bytes: bytes, signature_bytes: bytes) -> LicenseData:
     """
     Verify Ed25519 signature of license token.
-    Returns LicenseData if valid, None if invalid.
+    Returns LicenseData if valid, raises SecurityException if invalid.
     """
     if not CLOUD_PUBLIC_KEY:
         raise SecurityException("Cloud public key not configured")

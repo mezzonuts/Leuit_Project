@@ -22,8 +22,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
         const res = await authApi.status()
         if (res.data.status === 'ACTIVE' || res.data.status === 'GRACE_PERIOD') {
           unlock(res.data.role as 'OWNER' | 'DEVELOPER', res.data.last_unlocked_at)
-          if (res.data.grace_days !== undefined) {
-            setSecurityState({ license_grace_days: res.data.grace_days })
+          if (res.data.grace_days_left !== undefined) {
+            setSecurityState({ is_locked: false })
           }
         } else if (res.data.status === 'LOCKED') {
           setSecurityState({ is_locked: true })

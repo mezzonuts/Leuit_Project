@@ -1,10 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Calculator, Package, AlertCircle, CheckCircle, Loader2, ArrowDown } from 'lucide-react'
 import { api } from '@/services/api'
-import { formatRupiah, formatNumber, cn } from '@/utils/formatters'
+import { formatNumber, cn } from '@/utils/formatters'
 import type { Ingredient } from '@/types'
 
 const scalerSchema = z.object({
@@ -18,8 +19,8 @@ interface RecipeScalerToolProps {
   ingredients: Ingredient[]
 }
 
-export default function RecipeScalerTool({ ingredients }: RecipeScalerToolProps) {
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<ScalerFormSchema>({
+export default function RecipeScalerTool({ ingredients: _ingredients }: RecipeScalerToolProps) {
+  const { register, watch, formState: { errors } } = useForm<ScalerFormSchema>({
     resolver: zodResolver(scalerSchema),
     defaultValues: {
       menu_item_id: 0,

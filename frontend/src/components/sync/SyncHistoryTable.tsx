@@ -1,6 +1,5 @@
-import { Eye, Download, Trash2, CheckCircle, AlertCircle, Clock } from 'lucide-react'
-import { formatDate, formatNumber, formatDateTime } from '@/utils/formatters'
-import { cn } from '@/utils/formatters'
+import { Eye, Download, FileText, Clock } from 'lucide-react'
+import { formatDate, formatDateTime, formatNumber } from '@/utils/formatters'
 
 interface SyncHistoryTableProps {
   history: any[]

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Plus, Search, ChefHat, Calculator } from 'lucide-react'
+import { Plus, ChefHat, Calculator } from 'lucide-react'
 import { api } from '@/services/api'
 import { useUIStore } from '@/stores'
 import RecipeDrawer from './RecipeDrawer'
@@ -8,12 +8,11 @@ import RecipeScalerTool from './RecipeScalerTool'
 
 export default function BOM() {
   const { openDrawer, closeDrawer, activeDrawer } = useUIStore()
-  const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<'menus' | 'scaler'>('menus')
 
   const { data: menus } = useQuery({
-    queryKey: ['menus', search],
-    queryFn: () => api.get('/bom/menus', { params: { search } }).then(res => res.data),
+    queryKey: ['menus'],
+    queryFn: () => api.get('/bom/menus').then(res => res.data),
   })
 
   const { data: ingredients } = useQuery({

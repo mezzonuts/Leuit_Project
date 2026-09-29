@@ -1,5 +1,5 @@
-import { X, CheckCircle, AlertCircle, RefreshCw, Package, Clock } from 'lucide-react'
-import { formatDate, formatNumber } from '@/utils/formatters'
+import { X, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { formatDate } from '@/utils/formatters'
 import { cn } from '@/utils/formatters'
 
 interface SyncResultSummaryProps {

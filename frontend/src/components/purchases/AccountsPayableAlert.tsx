@@ -1,5 +1,5 @@
-import { AlertTriangle, Clock, DollarSign, CreditCard, CheckCircle } from 'lucide-react'
-import { formatRupiah, formatDate, formatNumber } from '@/utils/formatters'
+import { Clock, DollarSign, CreditCard } from 'lucide-react'
+import { formatRupiah, formatDate } from '@/utils/formatters'
 import { cn } from '@/utils/formatters'
 
 interface AccountsPayableAlertProps {

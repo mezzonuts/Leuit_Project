@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Plus, Search, CreditCard, DollarSign, Clock, AlertTriangle, Package, Truck } from 'lucide-react'
+import { Plus, CreditCard, DollarSign, Package, Truck } from 'lucide-react'
 import { api } from '@/services/api'
 import { formatRupiah, formatDate, formatNumber } from '@/utils/formatters'
 import { useUIStore } from '@/stores'
@@ -12,12 +12,10 @@ export default function Purchases() {
   const queryClient = useQueryClient()
   const { openDrawer, closeDrawer, activeDrawer } = useUIStore()
   const [activeTab, setActiveTab] = useState<'list' | 'restock' | 'payables'>('list')
-  const [search, setSearch] = useState('')
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'PAID' | 'UNPAID'>('ALL')
 
   const { data: purchases } = useQuery({
-    queryKey: ['purchases', search, filterStatus],
-    queryFn: () => api.get('/purchases', { params: { search, status: filterStatus !== 'ALL' ? filterStatus : undefined } }).then(res => res.data),
+    queryKey: ['purchases'],
+    queryFn: () => api.get('/purchases').then(res => res.data),
   })
 
   const { data: suppliers } = useQuery({
@@ -33,15 +31,6 @@ export default function Purchases() {
   const { data: restockSheet } = useQuery({
     queryKey: ['restock-sheet'],
     queryFn: () => api.get('/purchases/restock-sheet').then(res => res.data),
-  })
-
-  const createMutation = useMutation({
-    mutationFn: (data: any) => api.post('/purchases', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['purchases'] })
-      queryClient.invalidateQueries({ queryKey: ['payables'] })
-      closeDrawer()
-    },
   })
 
   const payMutation = useMutation({

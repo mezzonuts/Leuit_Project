@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Lock, Unlock, Loader2, AlertCircle, Key, Shield, Eye, EyeOff, ChevronLeft } from 'lucide-react'
+import { Lock, Unlock, Loader2, AlertCircle, Key, Shield, Eye, EyeOff } from 'lucide-react'
 import { api } from '@/services/api'
 import { cn } from '@/utils/formatters'
 
@@ -82,7 +82,7 @@ export default function DatabaseUnlockModal({ onUnlock }: DatabaseUnlockModalPro
           <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
             <button
               type="button"
-              onClick={() => { setIsDeveloper(false); setValue('is_developer', false) }}
+              onClick={() => setIsDeveloper(false)}
               className={cn(
                 'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors',
                 !isDeveloper ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600'
@@ -93,7 +93,7 @@ export default function DatabaseUnlockModal({ onUnlock }: DatabaseUnlockModalPro
             </button>
             <button
               type="button"
-              onClick={() => { setIsDeveloper(true); setValue('is_developer', true) }}
+              onClick={() => setIsDeveloper(true)}
               className={cn(
                 'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors',
                 isDeveloper ? 'bg-white text-danger-600 shadow-sm' : 'text-gray-600'
@@ -170,9 +170,4 @@ export default function DatabaseUnlockModal({ onUnlock }: DatabaseUnlockModalPro
       </div>
     </div>
   )
-}
-
-// Helper for form
-function setValue(name: string, value: any) {
-  // This will be handled by react-hook-form
 }

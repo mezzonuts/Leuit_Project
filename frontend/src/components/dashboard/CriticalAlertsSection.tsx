@@ -1,5 +1,4 @@
 import { Clock, Package, AlertTriangle } from 'lucide-react'
-import { formatDate, daysUntilExpiry, getStockRatio, getStockStatus, getStockStatusColor, getStockProgressColor } from '@/utils/formatters'
 import type { CriticalAlertItem } from '@/types'
 
 interface CriticalAlertsSectionProps {
