@@ -82,7 +82,10 @@ build-binary-windows:
   needs: [build-frontend]
   before_script:
     - choco install python --version=3.11 -y
+    - choco install vcpkg -y
     - refreshenv
+    - vcpkg integrate install
+    - vcpkg install sqlcipher:x64-windows
     - pip install uv pyinstaller pyarmor
   script:
     - cd backend
@@ -101,7 +104,7 @@ build-binary-linux:
   image: python:3.11-slim
   needs: [build-frontend]
   before_script:
-    - apt-get update && apt-get install -y git wget
+    - apt-get update && apt-get install -y git wget libsqlcipher-dev
     - pip install uv pyinstaller pyarmor
   script:
     - cd backend
