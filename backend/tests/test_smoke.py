@@ -2,13 +2,13 @@
 import pytest
 
 
-def test_backend_imports():
+def test_backend_imports() -> None:
     """Verify core modules can be imported."""
     from app.core.config import settings
     assert settings.APP_NAME == "LEUIT"
 
 
-def test_security_hardware():
+def test_security_hardware() -> None:
     """Verify hardware fingerprint generation works."""
     from app.core.security.hardware import get_machine_fingerprint
     fingerprint = get_machine_fingerprint()
@@ -16,7 +16,7 @@ def test_security_hardware():
     assert fingerprint != ""
 
 
-def test_security_key_envelope():
+def test_security_key_envelope() -> None:
     """Verify dual-key envelope encryption works."""
     from app.core.security.key_envelope import KeyEnvelope
 

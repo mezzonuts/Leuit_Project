@@ -59,7 +59,7 @@ class LicenseData:
 def verify_license_signature(token_bytes: bytes, signature_bytes: bytes) -> Optional[LicenseData]:
     """
     Verify Ed25519 signature of license token.
-    Returns LicenseData if valid, None if invalid.
+    Returns LicenseData if valid, raises SecurityException if invalid.
     """
     if not CLOUD_PUBLIC_KEY:
         raise SecurityException("Cloud public key not configured")
@@ -151,6 +151,9 @@ def verify_license_token(
     """
     # 1. Verify cryptographic signature
     license_data = verify_license_signature(token_bytes, signature_bytes)
+
+    if license_data is None:
+        raise SecurityException("Failed to verify license signature")
 
     # 2. Verify hardware binding
     if not check_hardware_binding(license_data):

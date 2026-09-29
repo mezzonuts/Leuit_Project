@@ -1,11 +1,13 @@
 import os
 import secrets
 import hashlib
+import time
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from typing import Tuple, Optional
 import nacl.secret
 import nacl.utils
+import nacl.public
 
 DEK_SIZE = 32
 SALT_SIZE = 16
@@ -150,5 +152,3 @@ def generate_key_rotation_package(
         "old_dek_hash": hashlib.sha256(old_dek).hexdigest(),
         "rotated_at": int(time.time()),
     }
-
-import time
