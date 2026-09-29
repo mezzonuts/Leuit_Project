@@ -42,6 +42,11 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
+      - name: Install SQLCipher system dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlcipher-dev
+
       - name: Install backend dependencies
         run: uv sync --frozen
         working-directory: backend
@@ -92,6 +97,11 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend
+
+      - name: Install SQLCipher system dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlcipher-dev
 
       - name: Install backend dependencies
         run: uv sync --frozen
@@ -175,6 +185,9 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
+      - name: Install SQLCipher system dependency
+        run: choco install sqlcipher -y
+
       - name: Install backend dependencies
         run: uv sync --frozen
         working-directory: backend
@@ -220,6 +233,9 @@ jobs:
         with:
           name: frontend-dist
           path: frontend/dist
+
+      - name: Install SQLCipher system dependency
+        run: brew install sqlcipher
 
       - name: Install backend dependencies
         run: uv sync --frozen
