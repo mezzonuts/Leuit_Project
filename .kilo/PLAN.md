@@ -32,7 +32,7 @@
 | **3** | **Backend: Auth API & Models** ✅ | All models verified, 59 new tests (model properties, to_dict, repr, auth schemas), PR #4 merged |
 | **4** | **Backend: Inventory CRUD + Valuation** ✅ | Router verified (11 endpoints), 40 new tests, schema hardened (barcode regex, cost>0), PR #5 merged |
 | **5** | **Backend: POS Sync Engine** ✅ | Router verified (3 endpoints, 235 lines), 20 new tests (dedup, column mapping, BOM deduction), schema hardened, PR #6 merged |
-| **6** | **Frontend: Vite + React + Tailwind + Auth UI** | `DatabaseUnlockModal.tsx`, `KeyStatusIndicator.tsx`, Sidebar layout, routing, TanStack Query setup |
+| **6** | **Frontend: Vite + React + Tailwind + Auth UI** ✅ | Auth components verified (11+7), Layout verified (10+12+11), 51 new tests, PR #7 merged |
 | **7** | **Frontend: Inventory CRUD + Slide-Over Drawer** | `IngredientTable.tsx`, `IngredientDrawer.tsx` (450px slide-over), `BarcodeCameraModal.tsx` (html5-qrcode), React Hook Form + Zod |
 
 ---
