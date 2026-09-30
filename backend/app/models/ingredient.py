@@ -60,7 +60,7 @@ class Ingredient(Base):
     @property
     def days_until_expiry(self) -> int:
         """Estimated days until expiry (simplified)."""
-        return self.shelf_life_days
+        return int(self.shelf_life_days)
 
     def to_dict(self) -> dict[str, object]:
         return {

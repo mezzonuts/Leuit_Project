@@ -28,23 +28,37 @@ git commit -m "feat(<scope>): <description>"
 git push origin <branch>
 ```
 
-### Stage 4: CI BUILD
-- Push triggers GitHub Actions workflow automatically
-- Monitor workflow: `gh run watch <run-id>`
-- If fails → fix, amend commit, force-push
+### Stage 4: CI BUILD + AUTO-RETRY
+Push triggers GitHub Actions workflow automatically.
 
-### Stage 5: TEST
-CI runs automatically:
+**Auto-retry loop (max 5 iterations):**
+```
+1. Wait 120 seconds (let CI start + run)
+2. Check: gh run list --limit 1 --json conclusion
+3. If conclusion == "success" → go to Stage 5
+4. If conclusion == "failure" →
+   a. Get failed step: gh run view <id> --log-failed | tail -50
+   b. Diagnose error (lint, mypy, test)
+   c. Fix the code
+   d. git add -A && git commit --amend --no-edit && git push --force-with-lease
+   e. Go to step 1 (wait 120s again)
+5. If conclusion == "in_progress" → wait 60s, check again
+6. If still failing after 5 iterations → STOP, report to user
+```
+
+**Key rules:**
+- Never skip a failing CI — always fix before proceeding
+- Use `--force-with-lease` (not `--force`) for safety
+- Log each iteration: what failed, what was fixed
+
+### Stage 5: TEST GATE
+After CI passes, verify quality gates:
 - **Lint**: ESLint (frontend) + Ruff (backend) — 0 errors
 - **TypeCheck**: TypeScript strict + mypy — 0 errors
 - **Unit Tests**: Vitest + pytest — all pass
 - **Coverage**: ≥ 80% on new code
 
-If tests fail:
-1. Read CI logs
-2. Fix issues
-3. Amend commit + force-push
-4. Re-watch CI
+If any gate fails → go back to Stage 4 auto-retry loop.
 
 ### Stage 6: CREATE PR
 ```bash
@@ -69,12 +83,18 @@ Post-release:
 - Monitor crash reports (if telemetry added)
 - Track license activation metrics
 
-### Stage 10: NEXT PLAN
-When current sprint day complete:
-1. Update `.kilo/PLAN.md` — mark day as done
-2. Review next day's deliverables
-3. Create new branch if needed
-4. Repeat Stage 1
+### Stage 10: NEXT PLAN + SPRINT TRANSITION
+When current sprint day complete (all tasks done, CI green, PR merged):
+1. Update `.kilo/PLAN.md` — mark current day as ✅ done
+2. Read next day's deliverables from PLAN.md
+3. Create new branch: `feat/day<N>-<scope>`
+4. Write new plan: `.kilo/plans/<timestamp>-<next-topic>.md`
+5. Begin Stage 1 (PLAN) for next day
+6. Auto-repeat until sprint complete (Day 14)
+
+**Sprint transition:**
+- End of Sprint 1 (Day 7) → update PLAN.md, create Sprint 2 plan
+- End of Sprint 2 (Day 14) → generate `RELEASE_REPORT.md`, notify user
 
 ---
 
