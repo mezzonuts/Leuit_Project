@@ -174,7 +174,7 @@ class TestStockDeductionLogic:
         assert new_stock == 350.0
 
     def test_multiple_ingredients(self) -> None:
-        deductions = {}
+        deductions: dict[int, float] = {}
         # Recipe: Menu A uses 2 ingredients
         deductions[1] = deductions.get(1, 0) + (50.0 * 3)
         deductions[2] = deductions.get(2, 0) + (200.0 * 3)
