@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from typing import Any
-import pytest
-from datetime import datetime, timezone, timedelta
 from unittest.mock import MagicMock
 
 
