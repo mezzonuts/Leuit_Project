@@ -1,0 +1,3 @@
+﻿Route ['app', 'endpoint', 'handle', 'include_in_schema', 'matches', 'methods', 'name', 'param_convertors', 'path', 'path_format']
+_IncludedRouter ['effective_candidates', 'effective_low_priority_routes', 'effective_route_contexts', 'handle', 'include_context', 'matches', 'original_router', 'url_path_for']
+APIRoute ['app', 'body_field', 'callbacks', 'dependant', 'dependencies', 'dependency_overrides_provider', 'deprecated', 'description', 'endpoint', 'generate_unique_id_function']

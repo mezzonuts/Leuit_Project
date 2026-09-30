@@ -1,0 +1,14 @@
+﻿/inventory/inventory {'GET'}
+/inventory/inventory/{ingredient_id} {'GET'}
+/inventory/inventory {'POST'}
+/inventory/inventory/{ingredient_id} {'PUT'}
+/inventory/inventory/{ingredient_id} {'DELETE'}
+/inventory/inventory/{ingredient_id}/stock-opname {'POST'}
+/inventory/inventory/valuation/summary {'GET'}
+/inventory/inventory/valuation/items {'GET'}
+/inventory/inventory/valuation/export-csv {'GET'}
+/inventory/inventory/usage-trend {'GET'}
+/inventory/inventory/alerts {'GET'}
+
+Trying /api/v1/inventory/inventory ...
+  Status: 500

@@ -1,0 +1,3 @@
+﻿/openapi.json {'HEAD', 'GET'}
+ set()
+/health {'GET'}

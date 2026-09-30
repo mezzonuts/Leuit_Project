@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_db, verify_license
 from app.models.ingredient import Ingredient
-from app.models.purchase import InventoryPurchase, PaymentMethod, PaymentStatus, Supplier
+from app.models.purchase import InventoryPurchase, PaymentMethod, PaymentStatus
+from app.models.supplier import Supplier
 from app.schemas.purchase_schema import (
     AccountsPayableAlert,
     AccountsPayableResponse,

@@ -1,0 +1,13 @@
+﻿Router prefix: /inventory
+Router routes:
+  APIRoute /inventory {'GET'}
+  APIRoute /inventory/{ingredient_id} {'GET'}
+  APIRoute /inventory {'POST'}
+  APIRoute /inventory/{ingredient_id} {'PUT'}
+  APIRoute /inventory/{ingredient_id} {'DELETE'}
+  APIRoute /inventory/{ingredient_id}/stock-opname {'POST'}
+  APIRoute /inventory/valuation/summary {'GET'}
+  APIRoute /inventory/valuation/items {'GET'}
+  APIRoute /inventory/valuation/export-csv {'GET'}
+  APIRoute /inventory/usage-trend {'GET'}
+  APIRoute /inventory/alerts {'GET'}
