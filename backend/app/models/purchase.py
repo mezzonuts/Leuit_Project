@@ -49,7 +49,7 @@ class InventoryPurchase(Base):
     def is_overdue(self) -> bool:
         if self.payment_status == PaymentStatus.UNPAID and self.due_date:
             from datetime import datetime
-            return datetime.now(UTC) > self.due_date
+            return bool(datetime.now(UTC) > self.due_date)
         return False
 
     @property

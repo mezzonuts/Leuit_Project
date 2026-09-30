@@ -23,7 +23,7 @@ class Supplier(Base):
 
     @property
     def is_credit(self) -> bool:
-        return self.payment_terms_days > 0
+        return bool(self.payment_terms_days > 0)
 
     def to_dict(self) -> dict[str, object]:
         return {
