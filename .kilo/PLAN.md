@@ -30,7 +30,7 @@
 | **1** | **Repo Init & CI/CD** ✅ | `git init`, folder structure, GitHub Actions workflow, GitLab CI mirror, README, `.gitignore`, `pnpm-workspace.yaml`, `pyproject.toml` — merged to staging |
 | **2** | **Backend: SQLCipher + Dual-Key Auth** ✅ | `app/core/security/` (hardware.py, licensing.py, key_envelope.py), `app/core/database.py` (SQLCipher engine), middleware license guard — PR #3 merged |
 | **3** | **Backend: Auth API & Models** ✅ | All models verified, 59 new tests (model properties, to_dict, repr, auth schemas), PR #4 merged |
-| **4** | **Backend: Inventory CRUD + Valuation** | Router `/inventory` (CRUD, stock-opname, threshold), `/valuation` + CSV export streaming |
+| **4** | **Backend: Inventory CRUD + Valuation** ✅ | Router verified (11 endpoints), 40 new tests, schema hardened (barcode regex, cost>0), PR #5 merged |
 | **5** | **Backend: POS Sync Engine** | `/sync/pos-csv` (SHA-256 deduplikasi, auto stock deduction via BOM), `services/pos_reconciler.py` |
 | **6** | **Frontend: Vite + React + Tailwind + Auth UI** | `DatabaseUnlockModal.tsx`, `KeyStatusIndicator.tsx`, Sidebar layout, routing, TanStack Query setup |
 | **7** | **Frontend: Inventory CRUD + Slide-Over Drawer** | `IngredientTable.tsx`, `IngredientDrawer.tsx` (450px slide-over), `BarcodeCameraModal.tsx` (html5-qrcode), React Hook Form + Zod |
