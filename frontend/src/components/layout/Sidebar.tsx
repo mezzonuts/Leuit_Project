@@ -61,7 +61,7 @@ export default function Sidebar({ isOpen, onToggle, mobileOpen, onMobileClose }:
                 aria-current={isActive ? 'page' : undefined}
                 onClick={onMobileClose}
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                <item.icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" data-testid="nav-icon" />
                 {isOpen && <span>{item.name}</span>}
               </NavLink>
             )
