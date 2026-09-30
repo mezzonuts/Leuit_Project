@@ -1,12 +1,15 @@
 """Unit tests for SQLAlchemy models: properties, to_dict, __repr__."""
 
+from __future__ import annotations
+
+from typing import Any
 import pytest
 from datetime import datetime, timezone, timedelta
 from unittest.mock import MagicMock
 
 
 class TestIngredientModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.ingredient import Ingredient
 
         defaults = dict(
@@ -20,39 +23,39 @@ class TestIngredientModel:
         defaults.update(kwargs)
         return Ingredient(**defaults)
 
-    def test_stock_ratio_above_threshold(self):
+    def test_stock_ratio_above_threshold(self) -> None:
         ing = self._make(current_stock=200, min_stock_threshold=100)
         assert ing.stock_ratio == 200.0
 
-    def test_stock_ratio_below_threshold(self):
+    def test_stock_ratio_below_threshold(self) -> None:
         ing = self._make(current_stock=50, min_stock_threshold=100)
         assert ing.stock_ratio == 50.0
 
-    def test_stock_ratio_zero_threshold(self):
+    def test_stock_ratio_zero_threshold(self) -> None:
         ing = self._make(current_stock=50, min_stock_threshold=0)
         assert ing.stock_ratio == 100.0
 
-    def test_stock_status_safe(self):
+    def test_stock_status_safe(self) -> None:
         ing = self._make(current_stock=300, min_stock_threshold=100)
         assert ing.stock_status == "safe"
 
-    def test_stock_status_warning(self):
+    def test_stock_status_warning(self) -> None:
         ing = self._make(current_stock=120, min_stock_threshold=100)
         assert ing.stock_status == "warning"
 
-    def test_stock_status_danger(self):
+    def test_stock_status_danger(self) -> None:
         ing = self._make(current_stock=50, min_stock_threshold=100)
         assert ing.stock_status == "danger"
 
-    def test_valuation(self):
+    def test_valuation(self) -> None:
         ing = self._make(current_stock=10, cost_per_unit=5000)
         assert ing.valuation == 50000.0
 
-    def test_days_until_expiry(self):
+    def test_days_until_expiry(self) -> None:
         ing = self._make(shelf_life_days=30)
         assert ing.days_until_expiry == 30
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         ing = self._make(
             id=1,
             barcode_sku="SKU001",
@@ -79,7 +82,7 @@ class TestIngredientModel:
         assert d["created_at"] is None
         assert d["updated_at"] is None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         ing = self._make(id=1, name="Tepung", current_stock=100)
         r = repr(ing)
         assert "Tepung" in r
@@ -87,22 +90,22 @@ class TestIngredientModel:
 
 
 class TestSupplierModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.supplier import Supplier
 
         defaults = dict(name="PT ABC", payment_terms_days=0)
         defaults.update(kwargs)
         return Supplier(**defaults)
 
-    def test_is_credit_true(self):
+    def test_is_credit_true(self) -> None:
         s = self._make(payment_terms_days=14)
         assert s.is_credit is True
 
-    def test_is_credit_false(self):
+    def test_is_credit_false(self) -> None:
         s = self._make(payment_terms_days=0)
         assert s.is_credit is False
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         s = self._make(id=1, name="PT ABC", phone_whatsapp="08123", payment_terms_days=7)
         d = s.to_dict()
         assert d["name"] == "PT ABC"
@@ -110,7 +113,7 @@ class TestSupplierModel:
         assert d["is_credit"] is True
         assert d["created_at"] is None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         s = self._make(id=1, name="PT ABC", payment_terms_days=7)
         r = repr(s)
         assert "PT ABC" in r
@@ -118,14 +121,14 @@ class TestSupplierModel:
 
 
 class TestMenuItemModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.menu import MenuItem
 
         defaults = dict(name="Kopi", sale_price=25000)
         defaults.update(kwargs)
         return MenuItem(**defaults)
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         m = self._make(id=1, pos_item_id="POS001", name="Kopi", sale_price=25000, is_active=True)
         d = m.to_dict()
         assert d["id"] == 1
@@ -135,7 +138,7 @@ class TestMenuItemModel:
         assert d["is_active"] is True
         assert d["created_at"] is None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         m = self._make(id=1, name="Kopi", sale_price=25000)
         r = repr(m)
         assert "Kopi" in r
@@ -143,7 +146,7 @@ class TestMenuItemModel:
 
 
 class TestRecipeItemModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.menu import RecipeItem
 
         defaults = dict(menu_item_id=1, ingredient_id=1, quantity_required=50)
@@ -151,18 +154,18 @@ class TestRecipeItemModel:
         ri = RecipeItem(**defaults)
         return ri
 
-    def test_cost_per_portion_with_ingredient(self):
+    def test_cost_per_portion_with_ingredient(self) -> None:
         ri = self._make(quantity_required=50)
         ri.ingredient = MagicMock()
         ri.ingredient.cost_per_unit = 1000
         assert ri.cost_per_portion == 50000.0
 
-    def test_cost_per_portion_without_ingredient(self):
+    def test_cost_per_portion_without_ingredient(self) -> None:
         ri = self._make(quantity_required=50)
         ri.ingredient = None
         assert ri.cost_per_portion == 0.0
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         ri = self._make(id=1, quantity_required=50)
         ri.menu_item = MagicMock()
         ri.menu_item.name = "Kopi"
@@ -178,7 +181,7 @@ class TestRecipeItemModel:
         assert d["quantity_required"] == 50.0
         assert d["cost_per_portion"] == 50000.0
 
-    def test_to_dict_no_relations(self):
+    def test_to_dict_no_relations(self) -> None:
         ri = self._make(id=1, quantity_required=50)
         ri.menu_item = None
         ri.ingredient = None
@@ -187,7 +190,7 @@ class TestRecipeItemModel:
         assert d["ingredient_name"] is None
         assert d["ingredient_unit"] is None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         ri = self._make(menu_item_id=1, ingredient_id=1, quantity_required=50)
         r = repr(ri)
         assert "1" in r
@@ -195,7 +198,7 @@ class TestRecipeItemModel:
 
 
 class TestSalesTransactionModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.transaction import SalesTransaction
 
         now = datetime.now(timezone.utc)
@@ -207,7 +210,7 @@ class TestSalesTransactionModel:
         defaults.update(kwargs)
         return SalesTransaction(**defaults)
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         tx = self._make(id=1, pos_reference_id="POS-001", quantity=2, menu_item=None)
         d = tx.to_dict()
         assert d["id"] == 1
@@ -216,14 +219,14 @@ class TestSalesTransactionModel:
         assert d["quantity"] == 2
         assert d["menu_item_name"] is None
 
-    def test_to_dict_with_menu_item(self):
+    def test_to_dict_with_menu_item(self) -> None:
         mock_menu = MagicMock()
         mock_menu.name = "Kopi"
         tx = self._make(id=1, pos_reference_id="POS-001", quantity=2, menu_item=mock_menu)
         d = tx.to_dict()
         assert d["menu_item_name"] == "Kopi"
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         tx = self._make(transaction_hash="abc123def456", quantity=3)
         r = repr(tx)
         assert "abc123d" in r
@@ -231,7 +234,7 @@ class TestSalesTransactionModel:
 
 
 class TestPosSyncLogModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.transaction import PosSyncLog
 
         defaults = dict(
@@ -244,7 +247,7 @@ class TestPosSyncLogModel:
         defaults.update(kwargs)
         return PosSyncLog(**defaults)
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         log = self._make(id=1)
         d = log.to_dict()
         assert d["id"] == 1
@@ -256,7 +259,7 @@ class TestPosSyncLogModel:
         assert d["date_range_start"] is None
         assert d["date_range_end"] is None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         log = self._make(id=1, file_name="sales.csv", new_rows_inserted=95)
         r = repr(log)
         assert "sales.csv" in r
@@ -264,7 +267,7 @@ class TestPosSyncLogModel:
 
 
 class TestIngredientDailyUsageModel:
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         from app.models.transaction import IngredientDailyUsage
 
         now = datetime.now(timezone.utc)
@@ -280,7 +283,7 @@ class TestIngredientDailyUsageModel:
         assert d["usage_date"] is not None
         assert d["ingredient_name"] is None
 
-    def test_to_dict_with_ingredient(self):
+    def test_to_dict_with_ingredient(self) -> None:
         from app.models.transaction import IngredientDailyUsage
 
         now = datetime.now(timezone.utc)
@@ -294,7 +297,7 @@ class TestIngredientDailyUsageModel:
         d = usage.to_dict()
         assert d["ingredient_name"] == "Tepung"
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         from app.models.transaction import IngredientDailyUsage
 
         now = datetime.now(timezone.utc)
@@ -309,7 +312,7 @@ class TestIngredientDailyUsageModel:
 
 
 class TestInventoryPurchaseModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.purchase import InventoryPurchase, PaymentMethod, PaymentStatus
 
         now = datetime.now(timezone.utc)
@@ -325,53 +328,53 @@ class TestInventoryPurchaseModel:
         defaults.update(kwargs)
         return InventoryPurchase(**defaults)
 
-    def test_is_overdue_unpaid_past_due(self):
+    def test_is_overdue_unpaid_past_due(self) -> None:
         p = self._make(
             payment_status="UNPAID",
             due_date=datetime.now(timezone.utc) - timedelta(days=1),
         )
         assert p.is_overdue is True
 
-    def test_is_overdue_paid(self):
+    def test_is_overdue_paid(self) -> None:
         p = self._make(
             payment_status="PAID",
             due_date=datetime.now(timezone.utc) - timedelta(days=1),
         )
         assert p.is_overdue is False
 
-    def test_is_overdue_no_due_date(self):
+    def test_is_overdue_no_due_date(self) -> None:
         p = self._make(payment_status="UNPAID", due_date=None)
         assert p.is_overdue is False
 
-    def test_is_overdue_unpaid_not_yet_due(self):
+    def test_is_overdue_unpaid_not_yet_due(self) -> None:
         p = self._make(
             payment_status="UNPAID",
             due_date=datetime.now(timezone.utc) + timedelta(days=5),
         )
         assert p.is_overdue is False
 
-    def test_days_until_due_future(self):
+    def test_days_until_due_future(self) -> None:
         p = self._make(
             payment_status="UNPAID",
             due_date=datetime.now(timezone.utc) + timedelta(days=5),
         )
         assert p.days_until_due >= 4
 
-    def test_days_until_due_paid(self):
+    def test_days_until_due_paid(self) -> None:
         p = self._make(
             payment_status="PAID",
             due_date=datetime.now(timezone.utc) + timedelta(days=5),
         )
         assert p.days_until_due == 0
 
-    def test_days_until_due_past(self):
+    def test_days_until_due_past(self) -> None:
         p = self._make(
             payment_status="UNPAID",
             due_date=datetime.now(timezone.utc) - timedelta(days=3),
         )
         assert p.days_until_due == 0
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         from app.models.purchase import PaymentMethod, PaymentStatus
 
         p = self._make(
@@ -391,7 +394,7 @@ class TestInventoryPurchaseModel:
         assert d["ingredient_name"] == "Tepung"
         assert d["supplier_name"] == "PT ABC"
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         p = self._make(id=1, ingredient_id=1, total_cost=500000)
         r = repr(p)
         assert "1" in r
@@ -399,7 +402,7 @@ class TestInventoryPurchaseModel:
 
 
 class TestOperationalAuditLogModel:
-    def _make(self, **kwargs):
+    def _make(self, **kwargs: Any) -> Any:
         from app.models.purchase import OperationalAuditLog
 
         defaults = dict(
@@ -410,7 +413,7 @@ class TestOperationalAuditLogModel:
         defaults.update(kwargs)
         return OperationalAuditLog(**defaults)
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         now = datetime.now(timezone.utc)
         log = self._make(id=1, old_value="100", new_value="200", timestamp=now)
         d = log.to_dict()
@@ -422,7 +425,7 @@ class TestOperationalAuditLogModel:
         assert d["actor_role"] == "OWNER"
         assert d["timestamp"] is not None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         log = self._make(action_type="STOCK_OPNAME", entity_name="Tepung")
         r = repr(log)
         assert "STOCK_OPNAME" in r
@@ -430,7 +433,7 @@ class TestOperationalAuditLogModel:
 
 
 class TestSecurityModels:
-    def test_security_keyring_repr(self):
+    def test_security_keyring_repr(self) -> None:
         from app.models.security import SecurityKeyring
 
         kr = SecurityKeyring(
@@ -440,14 +443,14 @@ class TestSecurityModels:
         r = repr(kr)
         assert "SecurityKeyring" in r
 
-    def test_security_audit_clock_repr(self):
+    def test_security_audit_clock_repr(self) -> None:
         from app.models.security import SecurityAuditClock
 
         ac = SecurityAuditClock(last_seen_timestamp=1234567890)
         r = repr(ac)
         assert "1234567890" in r
 
-    def test_app_license_repr(self):
+    def test_app_license_repr(self) -> None:
         from app.models.security import AppLicense
 
         lic = AppLicense(
@@ -459,7 +462,7 @@ class TestSecurityModels:
         r = repr(lic)
         assert "2026" in r
 
-    def test_security_unlock_audit_repr(self):
+    def test_security_unlock_audit_repr(self) -> None:
         from app.models.security import SecurityUnlockAudit
 
         ua = SecurityUnlockAudit(role="OWNER", success=1)

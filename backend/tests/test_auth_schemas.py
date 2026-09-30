@@ -15,27 +15,27 @@ from app.schemas.auth_schema import (
 
 
 class TestUnlockRequest:
-    def test_minimal_valid(self):
+    def test_minimal_valid(self) -> None:
         req = UnlockRequest(passkey="123456")
         assert req.passkey == "123456"
         assert req.is_developer is False
 
-    def test_developer_mode(self):
+    def test_developer_mode(self) -> None:
         req = UnlockRequest(passkey="dev-key-123", is_developer=True)
         assert req.is_developer is True
         assert req.passkey == "dev-key-123"
 
-    def test_short_passkey_rejected(self):
+    def test_short_passkey_rejected(self) -> None:
         with pytest.raises(ValidationError):
             UnlockRequest(passkey="ab")
 
-    def test_exact_min_length_passes(self):
+    def test_exact_min_length_passes(self) -> None:
         req = UnlockRequest(passkey="1234")
         assert req.passkey == "1234"
 
 
 class TestUnlockResponse:
-    def test_success_response(self):
+    def test_success_response(self) -> None:
         resp = UnlockResponse(
             success=True,
             role="OWNER",
@@ -47,7 +47,7 @@ class TestUnlockResponse:
         assert resp.role == "OWNER"
         assert resp.license_status == "ACTIVE"
 
-    def test_developer_response(self):
+    def test_developer_response(self) -> None:
         resp = UnlockResponse(
             success=True,
             role="DEVELOPER",
@@ -55,7 +55,7 @@ class TestUnlockResponse:
         )
         assert resp.role == "DEVELOPER"
 
-    def test_failure_response(self):
+    def test_failure_response(self) -> None:
         resp = UnlockResponse(
             success=False,
             role="UNAUTHENTICATED",
@@ -65,7 +65,7 @@ class TestUnlockResponse:
 
 
 class TestAuthStatusResponse:
-    def test_locked_status(self):
+    def test_locked_status(self) -> None:
         resp = AuthStatusResponse(
             role="UNAUTHENTICATED",
             is_locked=True,
@@ -76,7 +76,7 @@ class TestAuthStatusResponse:
         assert resp.is_locked is True
         assert resp.license_status == "LOCKED"
 
-    def test_unlocked_with_license(self):
+    def test_unlocked_with_license(self) -> None:
         resp = AuthStatusResponse(
             is_locked=False,
             role="OWNER",
@@ -89,7 +89,7 @@ class TestAuthStatusResponse:
         assert resp.is_locked is False
         assert resp.license_id == "DEV-001"
 
-    def test_grace_period(self):
+    def test_grace_period(self) -> None:
         resp = AuthStatusResponse(
             is_locked=False,
             role="OWNER",
@@ -101,26 +101,26 @@ class TestAuthStatusResponse:
 
 
 class TestInitializeRequest:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         req = InitializeRequest(owner_passkey="secure-pin-123")
         assert req.owner_passkey == "secure-pin-123"
         assert req.license_id == "DEV-LOCAL-001"
 
-    def test_custom_license_id(self):
+    def test_custom_license_id(self) -> None:
         req = InitializeRequest(owner_passkey="longpin", license_id="CUSTOM-001")
         assert req.license_id == "CUSTOM-001"
 
-    def test_short_passkey_rejected(self):
+    def test_short_passkey_rejected(self) -> None:
         with pytest.raises(ValidationError):
             InitializeRequest(owner_passkey="short")
 
-    def test_exact_min_length_passes(self):
+    def test_exact_min_length_passes(self) -> None:
         req = InitializeRequest(owner_passkey="123456")
         assert req.owner_passkey == "123456"
 
 
 class TestInitializeResponse:
-    def test_basic_response(self):
+    def test_basic_response(self) -> None:
         resp = InitializeResponse(
             success=True,
             message="Initialized",
