@@ -3,11 +3,12 @@
 import time
 from collections import defaultdict
 from datetime import datetime
+from typing import Any
 
 import pytest
 
 
-def _make_rate_limiter() -> dict[str, object]:
+def _make_rate_limiter() -> dict[str, Any]:
     ns = {"defaultdict": defaultdict, "time": time}
     exec(
         "from collections import defaultdict\n"
