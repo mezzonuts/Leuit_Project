@@ -1,0 +1,71 @@
+﻿============================= test session starts =============================
+collecting ... collected 40 items
+
+tests/test_inventory_api.py::TestGetIngredients::test_list_empty PASSED  [  2%]
+tests/test_inventory_api.py::TestGetIngredients::test_list_with_data PASSED [  5%]
+tests/test_inventory_api.py::TestGetIngredients::test_list_search PASSED [  7%]
+tests/test_inventory_api.py::TestGetIngredients::test_list_active_only PASSED [ 10%]
+tests/test_inventory_api.py::TestGetIngredientDetail::test_get_by_id PASSED [ 12%]
+tests/test_inventory_api.py::TestGetIngredientDetail::test_get_not_found PASSED [ 15%]
+tests/test_inventory_api.py::TestCreateIngredient::test_create_success PASSED [ 17%]
+tests/test_inventory_api.py::TestCreateIngredient::test_create_duplicate_barcode PASSED [ 20%]
+tests/test_inventory_api.py::TestUpdateIngredient::test_update_success PASSED [ 22%]
+tests/test_inventory_api.py::TestUpdateIngredient::test_update_not_found PASSED [ 25%]
+tests/test_inventory_api.py::TestUpdateIngredient::test_update_duplicate_barcode PASSED [ 27%]
+tests/test_inventory_api.py::TestDeleteIngredient::test_soft_delete PASSED [ 30%]
+tests/test_inventory_api.py::TestDeleteIngredient::test_delete_not_found PASSED [ 32%]
+tests/test_inventory_api.py::TestStockOpname::test_stock_opname_success PASSED [ 35%]
+tests/test_inventory_api.py::TestStockOpname::test_stock_opname_not_found PASSED [ 37%]
+tests/test_inventory_api.py::TestValuationEndpoints::test_valuation_summary PASSED [ 40%]
+tests/test_inventory_api.py::TestValuationEndpoints::test_valuation_summary_low_stock PASSED [ 42%]
+tests/test_inventory_api.py::TestValuationEndpoints::test_valuation_summary_expired_soon PASSED [ 45%]
+tests/test_inventory_api.py::TestValuationEndpoints::test_valuation_items PASSED [ 47%]
+tests/test_inventory_api.py::TestValuationEndpoints::test_valuation_export_csv PASSED [ 50%]
+tests/test_inventory_api.py::TestUsageTrend::test_usage_trend_empty PASSED [ 52%]
+tests/test_inventory_api.py::TestUsageTrend::test_usage_trend_with_data PASSED [ 55%]
+tests/test_inventory_api.py::TestCriticalAlerts::test_alerts_empty PASSED [ 57%]
+tests/test_inventory_api.py::TestCriticalAlerts::test_alerts_low_stock PASSED [ 60%]
+tests/test_inventory_api.py::TestCriticalAlerts::test_alerts_critical_low_stock PASSED [ 62%]
+tests/test_inventory_api.py::TestCriticalAlerts::test_alerts_expiry PASSED [ 65%]
+tests/test_inventory_api.py::TestCriticalAlerts::test_alerts_critical_expiry PASSED [ 67%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_create_valid PASSED [ 70%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_invalid_unit_rejected PASSED [ 72%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_valid_units_accepted PASSED [ 75%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_negative_cost_rejected PASSED [ 77%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_zero_shelf_life_rejected PASSED [ 80%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_negative_stock_rejected PASSED [ 82%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_empty_name_rejected PASSED [ 85%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_update_partial PASSED [ 87%]
+tests/test_inventory_api.py::TestIngredientSchemaValidation::test_create_missing_unit PASSED [ 90%]
+tests/test_inventory_api.py::TestStockOpnameSchemaValidation::test_valid_quantity PASSED [ 92%]
+tests/test_inventory_api.py::TestStockOpnameSchemaValidation::test_negative_quantity_rejected PASSED [ 95%]
+tests/test_inventory_api.py::TestValuationSchema::test_summary_schema PASSED [ 97%]
+tests/test_inventory_api.py::TestValuationSchema::test_item_schema PASSED [100%]
+
+============================== warnings summary ===============================
+app\core\config.py:7
+  D:\Project\Leuit\backend\app\core\config.py:7: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+app\schemas\bom_schema.py:21
+  D:\Project\Leuit\backend\app\schemas\bom_schema.py:21: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class MenuItemResponse(MenuItemBase):
+
+app\schemas\bom_schema.py:41
+  D:\Project\Leuit\backend\app\schemas\bom_schema.py:41: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class RecipeItemResponse(RecipeItemBase):
+
+app\schemas\ingredient_schema.py:33
+  D:\Project\Leuit\backend\app\schemas\ingredient_schema.py:33: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class IngredientResponse(IngredientBase):
+
+app\schemas\purchase_schema.py:22
+  D:\Project\Leuit\backend\app\schemas\purchase_schema.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class SupplierResponse(SupplierBase):
+
+app\schemas\purchase_schema.py:59
+  D:\Project\Leuit\backend\app\schemas\purchase_schema.py:59: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PurchaseResponse(PurchaseBase):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 40 passed, 6 warnings in 1.97s ========================

@@ -1,0 +1,4 @@
+﻿Number of routes: 3
+Route /openapi.json
+_IncludedRouter N/A
+APIRoute /health

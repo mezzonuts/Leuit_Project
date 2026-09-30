@@ -57,18 +57,6 @@ def list_ingredients(
         total_pages=(total + limit - 1) // limit,
     )
 
-@router.get("/{ingredient_id}", response_model=IngredientResponse)
-def get_ingredient(
-    ingredient_id: int,
-    db: Session = Depends(get_db),
-    license_info: dict = Depends(verify_license),
-):
-    """Get single ingredient by ID."""
-    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
-    if not ingredient:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-    return IngredientResponse.model_validate(ingredient)
-
 @router.post("", response_model=IngredientResponse, status_code=status.HTTP_201_CREATED)
 def create_ingredient(
     data: IngredientCreate,
@@ -76,7 +64,6 @@ def create_ingredient(
     license_info: dict = Depends(verify_license),
 ):
     """Create new ingredient."""
-    # Check barcode uniqueness
     if data.barcode_sku:
         existing = db.query(Ingredient).filter(
             Ingredient.barcode_sku == data.barcode_sku
@@ -89,76 +76,6 @@ def create_ingredient(
     db.commit()
     db.refresh(ingredient)
     return IngredientResponse.model_validate(ingredient)
-
-@router.put("/{ingredient_id}", response_model=IngredientResponse)
-def update_ingredient(
-    ingredient_id: int,
-    data: IngredientUpdate,
-    db: Session = Depends(get_db),
-    license_info: dict = Depends(verify_license),
-):
-    """Update ingredient."""
-    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
-    if not ingredient:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-
-    # Check barcode uniqueness if changed
-    if data.barcode_sku and data.barcode_sku != ingredient.barcode_sku:
-        existing = db.query(Ingredient).filter(
-            Ingredient.barcode_sku == data.barcode_sku
-        ).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Barcode/SKU already exists")
-
-    update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(ingredient, field, value)
-
-    db.commit()
-    db.refresh(ingredient)
-    return IngredientResponse.model_validate(ingredient)
-
-@router.delete("/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_ingredient(
-    ingredient_id: int,
-    db: Session = Depends(get_db),
-    license_info: dict = Depends(verify_license),
-):
-    """Soft delete ingredient (archive)."""
-    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
-    if not ingredient:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-
-    ingredient.is_active = False
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-@router.post("/{ingredient_id}/stock-opname", response_model=StockOpnameResponse)
-def stock_opname(
-    ingredient_id: int,
-    data: StockOpnameRequest,
-    db: Session = Depends(get_db),
-    license_info: dict = Depends(verify_license),
-):
-    """Record stock opname (physical count adjustment)."""
-    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
-    if not ingredient:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-
-    previous_stock = float(ingredient.current_stock)
-    new_stock = data.quantity
-    difference = new_stock - previous_stock
-
-    ingredient.current_stock = new_stock
-    db.commit()
-
-    return StockOpnameResponse(
-        ingredient_id=ingredient_id,
-        previous_stock=previous_stock,
-        new_stock=new_stock,
-        difference=difference,
-        timestamp=func.now(),
-    )
 
 @router.get("/valuation/summary", response_model=ValuationSummary)
 def get_valuation_summary(
@@ -221,13 +138,11 @@ def export_valuation_csv(
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Header
     writer.writerow([
         "ID", "Nama Bahan", "Barcode/SKU", "Sisa Stok", "Satuan",
         "HPP per Satuan", "Total Valuasi", "Masa Simpan (Hari)", "Minimum Threshold"
     ])
 
-    # Data
     for ing in ingredients:
         writer.writerow([
             ing.id,
@@ -271,7 +186,6 @@ def get_usage_trend(
 
     usage = query.order_by(IngredientDailyUsage.usage_date).all()
 
-    # Group by date and ingredient
     result = []
     for u in usage:
         result.append({
@@ -316,3 +230,84 @@ def get_critical_alerts(
             })
 
     return alerts
+
+@router.get("/{ingredient_id}", response_model=IngredientResponse)
+def get_ingredient(
+    ingredient_id: int,
+    db: Session = Depends(get_db),
+    license_info: dict = Depends(verify_license),
+):
+    """Get single ingredient by ID."""
+    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+    if not ingredient:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+    return IngredientResponse.model_validate(ingredient)
+
+@router.put("/{ingredient_id}", response_model=IngredientResponse)
+def update_ingredient(
+    ingredient_id: int,
+    data: IngredientUpdate,
+    db: Session = Depends(get_db),
+    license_info: dict = Depends(verify_license),
+):
+    """Update ingredient."""
+    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+    if not ingredient:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+
+    if data.barcode_sku and data.barcode_sku != ingredient.barcode_sku:
+        existing = db.query(Ingredient).filter(
+            Ingredient.barcode_sku == data.barcode_sku
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Barcode/SKU already exists")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(ingredient, field, value)
+
+    db.commit()
+    db.refresh(ingredient)
+    return IngredientResponse.model_validate(ingredient)
+
+@router.delete("/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_ingredient(
+    ingredient_id: int,
+    db: Session = Depends(get_db),
+    license_info: dict = Depends(verify_license),
+):
+    """Soft delete ingredient (archive)."""
+    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+    if not ingredient:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+
+    ingredient.is_active = False
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/{ingredient_id}/stock-opname", response_model=StockOpnameResponse)
+def stock_opname(
+    ingredient_id: int,
+    data: StockOpnameRequest,
+    db: Session = Depends(get_db),
+    license_info: dict = Depends(verify_license),
+):
+    """Record stock opname (physical count adjustment)."""
+    ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+    if not ingredient:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+
+    previous_stock = float(ingredient.current_stock)
+    new_stock = data.quantity
+    difference = new_stock - previous_stock
+
+    ingredient.current_stock = new_stock
+    db.commit()
+
+    return StockOpnameResponse(
+        ingredient_id=ingredient_id,
+        previous_stock=previous_stock,
+        new_stock=new_stock,
+        difference=difference,
+        timestamp=func.now(),
+    )
