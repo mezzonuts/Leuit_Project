@@ -80,7 +80,7 @@ class TestGetDatabaseUrl:
 
 
 class TestSessionScope:
-    def test_raises_when_not_initialized(self):
+    def test_raises_when_not_initialized(self) -> None:
         db_mod._SessionLocal = None
         with pytest.raises(RuntimeError, match="Database not initialized"):
             with session_scope():

@@ -26,8 +26,8 @@ class InventoryPurchase(Base):
     supplier_id = Column(Integer, ForeignKey("suppliers.id", ondelete="RESTRICT"), nullable=False, index=True)
     quantity = Column(Numeric(15, 3), nullable=False)
     total_cost = Column(Numeric(15, 2), nullable=False)
-    payment_method = Column(SQLEnum(PaymentMethod), nullable=False, default=PaymentMethod.CASH)
-    payment_status = Column(SQLEnum(PaymentStatus), nullable=False, default=PaymentStatus.PAID)
+    payment_method = Column(SQLEnum(PaymentMethod), nullable=False, default=PaymentMethod.CASH)  # type: ignore[var-annotated]
+    payment_status = Column(SQLEnum(PaymentStatus), nullable=False, default=PaymentStatus.PAID)  # type: ignore[var-annotated]
     due_date = Column(DateTime(timezone=True), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -57,7 +57,7 @@ class InventoryPurchase(Base):
         if self.due_date and self.payment_status == PaymentStatus.UNPAID:
             from datetime import datetime
             delta = self.due_date - datetime.now(UTC)
-            return max(0, delta.days)
+            return int(max(0, delta.days))
         return 0
 
     def to_dict(self) -> dict[str, object]:
