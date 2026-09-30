@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -200,7 +200,7 @@ class TestSalesTransactionModel:
     def _make(self, **kwargs: Any) -> Any:
         from app.models.transaction import SalesTransaction
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         defaults = dict(
             transaction_hash="abc123def456",
             quantity=2,
@@ -269,7 +269,7 @@ class TestIngredientDailyUsageModel:
     def test_to_dict(self) -> None:
         from app.models.transaction import IngredientDailyUsage
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         usage = IngredientDailyUsage(
             usage_date=now,
             ingredient_id=1,
@@ -285,7 +285,7 @@ class TestIngredientDailyUsageModel:
     def test_to_dict_with_ingredient(self) -> None:
         from app.models.transaction import IngredientDailyUsage
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         usage = IngredientDailyUsage(
             usage_date=now,
             ingredient_id=1,
@@ -299,7 +299,7 @@ class TestIngredientDailyUsageModel:
     def test_repr(self) -> None:
         from app.models.transaction import IngredientDailyUsage
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         usage = IngredientDailyUsage(
             usage_date=now,
             ingredient_id=1,
@@ -314,7 +314,7 @@ class TestInventoryPurchaseModel:
     def _make(self, **kwargs: Any) -> Any:
         from app.models.purchase import InventoryPurchase, PaymentMethod, PaymentStatus
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         defaults = dict(
             purchase_date=now,
             ingredient_id=1,
@@ -330,14 +330,14 @@ class TestInventoryPurchaseModel:
     def test_is_overdue_unpaid_past_due(self) -> None:
         p = self._make(
             payment_status="UNPAID",
-            due_date=datetime.now(timezone.utc) - timedelta(days=1),
+            due_date=datetime.now(UTC) - timedelta(days=1),
         )
         assert p.is_overdue is True
 
     def test_is_overdue_paid(self) -> None:
         p = self._make(
             payment_status="PAID",
-            due_date=datetime.now(timezone.utc) - timedelta(days=1),
+            due_date=datetime.now(UTC) - timedelta(days=1),
         )
         assert p.is_overdue is False
 
@@ -348,28 +348,28 @@ class TestInventoryPurchaseModel:
     def test_is_overdue_unpaid_not_yet_due(self) -> None:
         p = self._make(
             payment_status="UNPAID",
-            due_date=datetime.now(timezone.utc) + timedelta(days=5),
+            due_date=datetime.now(UTC) + timedelta(days=5),
         )
         assert p.is_overdue is False
 
     def test_days_until_due_future(self) -> None:
         p = self._make(
             payment_status="UNPAID",
-            due_date=datetime.now(timezone.utc) + timedelta(days=5),
+            due_date=datetime.now(UTC) + timedelta(days=5),
         )
         assert p.days_until_due >= 4
 
     def test_days_until_due_paid(self) -> None:
         p = self._make(
             payment_status="PAID",
-            due_date=datetime.now(timezone.utc) + timedelta(days=5),
+            due_date=datetime.now(UTC) + timedelta(days=5),
         )
         assert p.days_until_due == 0
 
     def test_days_until_due_past(self) -> None:
         p = self._make(
             payment_status="UNPAID",
-            due_date=datetime.now(timezone.utc) - timedelta(days=3),
+            due_date=datetime.now(UTC) - timedelta(days=3),
         )
         assert p.days_until_due == 0
 
@@ -413,7 +413,7 @@ class TestOperationalAuditLogModel:
         return OperationalAuditLog(**defaults)
 
     def test_to_dict(self) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         log = self._make(id=1, old_value="100", new_value="200", timestamp=now)
         d = log.to_dict()
         assert d["id"] == 1
@@ -454,9 +454,9 @@ class TestSecurityModels:
 
         lic = AppLicense(
             license_key="ABC-123",
-            valid_until=datetime(2026, 12, 31, tzinfo=timezone.utc),
-            last_verified_at=datetime.now(timezone.utc),
-            grace_period_end=datetime(2027, 1, 15, tzinfo=timezone.utc),
+            valid_until=datetime(2026, 12, 31, tzinfo=UTC),
+            last_verified_at=datetime.now(UTC),
+            grace_period_end=datetime(2027, 1, 15, tzinfo=UTC),
         )
         r = repr(lic)
         assert "2026" in r

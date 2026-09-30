@@ -1,8 +1,6 @@
 """POS sync endpoints schema validation."""
 import hashlib
-from datetime import UTC, datetime, timezone
-
-import pytest
+from datetime import UTC, datetime
 
 from app.schemas.sync_schema import (
     PosSyncHistoryItem,
@@ -35,7 +33,7 @@ class TestPosSyncSchema:
         item = PosSyncHistoryItem(
             id=1,
             file_name="sales.csv",
-            uploaded_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            uploaded_at=datetime(2026, 1, 1, tzinfo=UTC),
             total_rows_read=100,
             new_rows_inserted=90,
             duplicate_rows_skipped=10,
@@ -48,7 +46,7 @@ class TestPosSyncSchema:
         item = PosSyncHistoryItem(
             id=1,
             file_name="test.csv",
-            uploaded_at=datetime.now(timezone.utc),
+            uploaded_at=datetime.now(UTC),
             total_rows_read=0,
             new_rows_inserted=0,
             duplicate_rows_skipped=0,
@@ -84,13 +82,13 @@ class TestDeduplicationHash:
         assert h1 == h2
 
     def test_different_order_different_hash(self) -> None:
-        h1 = hashlib.sha256("ORDER-001_a".encode()).hexdigest()
-        h2 = hashlib.sha256("ORDER-002_a".encode()).hexdigest()
+        h1 = hashlib.sha256(b"ORDER-001_a").hexdigest()
+        h2 = hashlib.sha256(b"ORDER-002_a").hexdigest()
         assert h1 != h2
 
     def test_different_date_different_hash(self) -> None:
-        h1 = hashlib.sha256("ORDER-001_2026-01-01_MenuA".encode()).hexdigest()
-        h2 = hashlib.sha256("ORDER-001_2026-01-02_MenuA".encode()).hexdigest()
+        h1 = hashlib.sha256(b"ORDER-001_2026-01-01_MenuA").hexdigest()
+        h2 = hashlib.sha256(b"ORDER-001_2026-01-02_MenuA").hexdigest()
         assert h1 != h2
 
     def test_hash_is_64_hex_chars(self) -> None:

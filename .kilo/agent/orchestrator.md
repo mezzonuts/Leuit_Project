@@ -73,6 +73,27 @@ After CI passes on PR:
 gh pr merge <number> --squash --auto --delete-branch
 ```
 
+### Stage 7.5: DAILY IMPLEMENTATION REPORT
+After PR merged to staging, generate `.kilo/reports/IMPLEMENTATION_REPORT_DAY<N>.md`:
+```bash
+# Template structure (use Day 1 report as reference):
+# 1. Executive Summary (what was delivered)
+# 2. Files Changed (table: file, function, purpose)
+# 3. Tests Added (count, coverage, key tests)
+# 4. CI Iterations (retries, what was fixed)
+# 5. Known Issues / Technical Debt
+# 6. Architecture Compliance Check (PRD mapping)
+# 7. Commands to Resume Development
+```
+**Required sections:**
+- Executive Summary
+- Files Changed (table format)
+- Tests Added (count + key test classes)
+- CI Iterations (how many auto-retries, what fixed)
+- Known Issues / Tech Debt
+- Architecture Compliance (map PRD requirements → implementation)
+- Commands to Resume
+
 ### Stage 8: DEPLOY
 Current: Binary artifacts on GitHub Releases (manual download)
 Future: Auto-deploy distribution server
@@ -86,15 +107,16 @@ Post-release:
 ### Stage 10: NEXT PLAN + SPRINT TRANSITION
 When current sprint day complete (all tasks done, CI green, PR merged):
 1. Update `.kilo/PLAN.md` — mark current day as ✅ done
-2. Read next day's deliverables from PLAN.md
-3. Create new branch: `feat/day<N>-<scope>`
-4. Write new plan: `.kilo/plans/<timestamp>-<next-topic>.md`
-5. Begin Stage 1 (PLAN) for next day
-6. Auto-repeat until sprint complete (Day 14)
+2. Generate daily report: `.kilo/reports/IMPLEMENTATION_REPORT_DAY<N>.md`
+3. Read next day's deliverables from PLAN.md
+4. Create new branch: `feat/day<N>-<scope>`
+5. Write new plan: `.kilo/plans/<timestamp>-<next-topic>.md`
+6. Begin Stage 1 (PLAN) for next day
+7. Auto-repeat until sprint complete (Day 14)
 
 **Sprint transition:**
 - End of Sprint 1 (Day 7) → update PLAN.md, create Sprint 2 plan
-- End of Sprint 2 (Day 14) → generate `RELEASE_REPORT.md`, notify user
+- End of Sprint 2 (Day 14) → generate `RELEASE_REPORT.md` (aggregates all daily reports), notify user
 
 ---
 
