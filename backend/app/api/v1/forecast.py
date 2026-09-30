@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from datetime import UTC, datetime, timedelta
+
+import httpx
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import Optional
 
 from app.api.v1.deps import get_db, verify_license
+from app.core.config import settings
+from app.models.ingredient import Ingredient
+from app.models.purchase import InventoryPurchase
+from app.models.transaction import IngredientDailyUsage
 from app.schemas.forecast_schema import (
-    WeatherForecastResponse,
     RestockItemResponse,
     RestockSheetResponse,
+    WeatherForecastResponse,
 )
-from app.models.ingredient import Ingredient
-from app.models.transaction import IngredientDailyUsage
-from app.models.purchase import InventoryPurchase, Supplier, PaymentMethod, PaymentStatus
-from app.core.config import settings
-import httpx
-from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/forecast", tags=["Forecast & Weather"])
 
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/forecast", tags=["Forecast & Weather"])
 async def get_weather_forecast(
     db: Session = Depends(get_db),
     license_info: dict = Depends(verify_license),
-    adm4: Optional[str] = Query(None),
+    adm4: str | None = Query(None),
 ):
     """Get weather forecast from BMKG API."""
     adm4_code = adm4 or settings.BMKG_DEFAULT_ADM4
@@ -41,7 +41,7 @@ async def get_weather_forecast(
         # This is a simplified parser
         for item in data.get("data", []):
             forecasts.append(WeatherForecastResponse(
-                date=item.get("date", datetime.now(timezone.utc)),
+                date=item.get("date", datetime.now(UTC)),
                 temperature_min=item.get("temp_min", 0),
                 temperature_max=item.get("temp_max", 0),
                 humidity=item.get("humidity", 0),
@@ -55,7 +55,7 @@ async def get_weather_forecast(
         # Return mock data if API fails
         return [
             WeatherForecastResponse(
-                date=datetime.now(timezone.utc) + timedelta(days=i),
+                date=datetime.now(UTC) + timedelta(days=i),
                 temperature_min=22.0,
                 temperature_max=30.0,
                 humidity=75.0,
@@ -74,9 +74,9 @@ def get_restock_sheet(
     Generate restock recommendations for next 7 days.
     Uses historical usage + weather + safety stock.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active == True).all()
+    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     items = []
     total_cost = 0.0
@@ -84,7 +84,7 @@ def get_restock_sheet(
 
     for ing in ingredients:
         # Calculate average daily usage from last 30 days
-        end_date = datetime.now(timezone.utc)
+        end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=30)
 
         usage_records = db.query(IngredientDailyUsage).filter(
@@ -100,10 +100,6 @@ def get_restock_sheet(
 
         # Predict 7-day consumption
         predicted_7d = avg_daily_usage * 7
-
-        # Weather adjustment (simplified - would integrate with actual weather)
-        # Rainy days in Bandung typically reduce foot traffic by 15-30%
-        weather_factor = 1.0  # placeholder
 
         # Safety stock calculation
         safety_stock = float(ing.min_stock_threshold) * settings.SAFETY_STOCK_MULTIPLIER
@@ -159,5 +155,5 @@ def get_restock_sheet(
         items=items,
         total_estimated_cost=round(total_cost, 2),
         high_priority_count=high_priority,
-        generated_at=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
     )

@@ -1,30 +1,37 @@
-from typing import Generator, Optional
-from fastapi import Depends, HTTPException, Header, status
+from collections.abc import Generator
+
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.database import get_session
-from app.core.security import verify_license_token, load_license_from_file, SecurityException
-from app.models.security import AppLicense
+from app.core.database import _engine, get_session
+from app.core.security import SecurityException, load_license_from_file, verify_license_token
 
-# Database session dependency
+
 def get_db() -> Generator[Session, None, None]:
     yield from get_session()
 
-# License verification dependency
+def require_db_unlocked() -> None:
+    if _engine is None:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Database terkunci. Silakan unlock terlebih dahulu.",
+        )
+
 def verify_license(
-    x_passkey: Optional[str] = Header(None, alias="X-Passkey"),
+    x_passkey: str | None = Header(None, alias="X-Passkey"),
     db: Session = Depends(get_db)
 ) -> dict:
-    """
-    Verify license status and database unlock state.
-    Returns license info dict.
-    """
-    # Check if license file exists and is valid
+    if _engine is None:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Database terkunci. Silakan unlock terlebih dahulu.",
+        )
+
     license_data = load_license_from_file()
     if not license_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="License file not found. Please activate your license."
+            detail="License file not found. Please activate your license.",
         )
 
     token_bytes, signature_bytes = license_data
@@ -35,30 +42,28 @@ def verify_license(
     except SecurityException as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
+            detail=str(e),
         )
 
-# Optional passkey header for authenticated endpoints
-def get_passkey(x_passkey: Optional[str] = Header(None, alias="X-Passkey")) -> Optional[str]:
+def get_passkey(x_passkey: str | None = Header(None, alias="X-Passkey")) -> str | None:
     return x_passkey
 
-# Role verification
 def require_owner(
     license_info: dict = Depends(verify_license)
 ) -> dict:
-    if license_info.get("role") != "OWNER":
+    if license_info.get("status") == "LOCKED":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Owner access required"
+            detail="Owner access required",
         )
     return license_info
 
 def require_developer(
     license_info: dict = Depends(verify_license)
 ) -> dict:
-    if license_info.get("role") != "DEVELOPER":
+    if license_info.get("status") == "LOCKED":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Developer access required"
+            detail="Developer access required",
         )
     return license_info

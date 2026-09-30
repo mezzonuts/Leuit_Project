@@ -3,8 +3,10 @@
 Generate Ed25519 key pair for license signing.
 Run this once during initial setup.
 """
-import nacl.signing
 import os
+
+import nacl.signing
+
 
 def generate_keys():
     """Generate Ed25519 signing and verification key pair."""

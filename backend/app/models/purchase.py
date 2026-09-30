@@ -1,15 +1,19 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey, Index, Enum as SQLEnum
+import enum
+from datetime import UTC
+
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
 
 from app.core.database import Base
 
-class PaymentMethod(str, enum.Enum):
+
+class PaymentMethod(enum.StrEnum):
     CASH = "CASH"
     CREDIT = "CREDIT"
 
-class PaymentStatus(str, enum.Enum):
+class PaymentStatus(enum.StrEnum):
     PAID = "PAID"
     UNPAID = "UNPAID"
 
@@ -22,8 +26,8 @@ class InventoryPurchase(Base):
     supplier_id = Column(Integer, ForeignKey("suppliers.id", ondelete="RESTRICT"), nullable=False, index=True)
     quantity = Column(Numeric(15, 3), nullable=False)
     total_cost = Column(Numeric(15, 2), nullable=False)
-    payment_method = Column(SQLEnum(PaymentMethod), nullable=False, default=PaymentMethod.CASH)
-    payment_status = Column(SQLEnum(PaymentStatus), nullable=False, default=PaymentStatus.PAID)
+    payment_method = Column(SQLEnum(PaymentMethod), nullable=False, default=PaymentMethod.CASH)  # type: ignore[var-annotated]
+    payment_status = Column(SQLEnum(PaymentStatus), nullable=False, default=PaymentStatus.PAID)  # type: ignore[var-annotated]
     due_date = Column(DateTime(timezone=True), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -38,25 +42,25 @@ class InventoryPurchase(Base):
         Index("ix_purchases_due_date_status", "due_date", "payment_status"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<InventoryPurchase(id={self.id}, ingredient={self.ingredient_id}, cost={self.total_cost})>"
 
     @property
     def is_overdue(self) -> bool:
         if self.payment_status == PaymentStatus.UNPAID and self.due_date:
-            from datetime import datetime, timezone
-            return datetime.now(timezone.utc) > self.due_date
+            from datetime import datetime
+            return bool(datetime.now(UTC) > self.due_date)
         return False
 
     @property
     def days_until_due(self) -> int:
         if self.due_date and self.payment_status == PaymentStatus.UNPAID:
-            from datetime import datetime, timezone
-            delta = self.due_date - datetime.now(timezone.utc)
-            return max(0, delta.days)
+            from datetime import datetime
+            delta = self.due_date - datetime.now(UTC)
+            return int(max(0, delta.days))
         return 0
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "purchase_date": self.purchase_date.isoformat() if self.purchase_date else None,
@@ -91,10 +95,10 @@ class OperationalAuditLog(Base):
         Index("ix_audit_action_entity", "action_type", "entity_name"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<OperationalAuditLog(action={self.action_type}, entity={self.entity_name})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "action_type": self.action_type,

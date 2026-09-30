@@ -117,12 +117,14 @@ jobs:
 
       - name: Upload frontend coverage
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           files: frontend/coverage/lcov.info
           flags: frontend
 
       - name: Upload backend coverage
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           files: backend/coverage.xml
           flags: backend

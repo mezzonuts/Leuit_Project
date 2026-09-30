@@ -1,11 +1,11 @@
 import json
 import time
-import nacl.signing
+from typing import Any
+
 import nacl.exceptions
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
-from sqlalchemy.orm import Session
+import nacl.signing
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security.hardware import get_machine_fingerprint
@@ -25,8 +25,8 @@ class LicenseData:
         hardware_id: str,
         valid_until: int,
         issued_at: int,
-        features: Optional[list] = None,
-        metadata: Optional[dict] = None
+        features: list | None = None,
+        metadata: dict | None = None
     ):
         self.license_id = license_id
         self.hardware_id = hardware_id
@@ -104,7 +104,7 @@ def check_monotonic_clock(db: Session) -> bool:
 
     return True
 
-def evaluate_license_status(license_data: LicenseData) -> Dict[str, Any]:
+def evaluate_license_status(license_data: LicenseData) -> dict[str, Any]:
     """
     Evaluate license status based on expiry and grace period.
     Returns dict with status, message, and days remaining.
@@ -141,7 +141,7 @@ def verify_license_token(
     token_bytes: bytes,
     signature_bytes: bytes,
     db: Session
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Complete license verification pipeline:
     1. Verify Ed25519 signature
@@ -173,12 +173,12 @@ def verify_license_token(
         "features": license_data.features,
     }
 
-def load_license_from_file(filepath: Optional[str] = None) -> Optional[tuple]:
+def load_license_from_file(filepath: str | None = None) -> tuple | None:
     """Load license token and signature from local file."""
     path = filepath or settings.LICENSE_FILE_PATH
 
     try:
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
 
         token = data.get("token", "").encode()
@@ -191,7 +191,7 @@ def load_license_from_file(filepath: Optional[str] = None) -> Optional[tuple]:
 
     return None
 
-def save_license_to_file(token_bytes: bytes, signature_bytes: bytes, filepath: Optional[str] = None) -> bool:
+def save_license_to_file(token_bytes: bytes, signature_bytes: bytes, filepath: str | None = None) -> bool:
     """Save license token and signature to local file."""
     path = filepath or settings.LICENSE_FILE_PATH
 

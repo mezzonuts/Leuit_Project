@@ -1,27 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, desc
-from typing import Optional, List
-from datetime import datetime, timezone
 
 from app.api.v1.deps import get_db, verify_license
+from app.models.ingredient import Ingredient
+from app.models.purchase import InventoryPurchase, PaymentMethod, PaymentStatus, Supplier
 from app.schemas.purchase_schema import (
-    SupplierCreate,
-    SupplierUpdate,
-    SupplierResponse,
-    PurchaseCreate,
-    PurchaseUpdate,
-    PurchaseResponse,
-    PurchaseListResponse,
     AccountsPayableAlert,
     AccountsPayableResponse,
+    PurchaseCreate,
+    PurchaseListResponse,
+    PurchaseResponse,
+    SupplierCreate,
+    SupplierResponse,
+    SupplierUpdate,
 )
-from app.models.purchase import Supplier, InventoryPurchase, PaymentMethod, PaymentStatus
 
 router = APIRouter(prefix="/purchases", tags=["Purchases"])
 
 # Supplier endpoints
-@router.get("/suppliers", response_model=List[SupplierResponse])
+@router.get("/suppliers", response_model=list[SupplierResponse])
 def list_suppliers(
     db: Session = Depends(get_db),
     license_info: dict = Depends(verify_license),
@@ -92,8 +92,8 @@ def list_purchases(
     license_info: dict = Depends(verify_license),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    search: Optional[str] = Query(None),
-    status_filter: Optional[str] = Query(None, alias="status"),
+    search: str | None = Query(None),
+    status_filter: str | None = Query(None, alias="status"),
 ):
     """List purchases with filters."""
     query = db.query(InventoryPurchase).join(Ingredient).join(Supplier)
@@ -172,7 +172,7 @@ def pay_purchase(
         raise HTTPException(status_code=400, detail="Already paid")
 
     purchase.payment_status = PaymentStatus.PAID
-    purchase.updated_at = datetime.now(timezone.utc)
+    purchase.updated_at = datetime.now(UTC)
 
     # Add stock when paid
     ingredient = db.query(Ingredient).filter(Ingredient.id == purchase.ingredient_id).first()
@@ -217,8 +217,8 @@ def get_payables(
     for supplier_id, data in supplier_totals.items():
         days_until = 0
         if data["nearest_due_date"]:
-            from datetime import datetime, timezone
-            delta = data["nearest_due_date"] - datetime.now(timezone.utc)
+            from datetime import datetime
+            delta = data["nearest_due_date"] - datetime.now(UTC)
             days_until = max(0, delta.days)
 
         if days_until <= 3 and days_until >= 0:
@@ -230,7 +230,7 @@ def get_payables(
             supplier_id=supplier_id,
             supplier_name=data["supplier"].name,
             total_unpaid=data["total_unpaid"],
-            nearest_due_date=data["nearest_due_date"] or datetime.now(timezone.utc),
+            nearest_due_date=data["nearest_due_date"] or datetime.now(UTC),
             days_until_due=days_until,
             purchase_count=data["purchase_count"],
         ))
@@ -249,7 +249,7 @@ def get_restock_sheet(
     """Get restock recommendations (simple version - full version in forecast)."""
     from app.models.ingredient import Ingredient
 
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active == True).all()
+    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     items = []
     for ing in ingredients:

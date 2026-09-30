@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey, Index
+from sqlalchemy import Boolean, Column, DateTime, Index, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
+
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
@@ -31,7 +32,7 @@ class Ingredient(Base):
         Index("ix_ingredients_stock_threshold", "current_stock", "min_stock_threshold"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Ingredient(id={self.id}, name='{self.name}', stock={self.current_stock})>"
 
     @property
@@ -59,9 +60,9 @@ class Ingredient(Base):
     @property
     def days_until_expiry(self) -> int:
         """Estimated days until expiry (simplified)."""
-        return self.shelf_life_days
+        return int(self.shelf_life_days)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "barcode_sku": self.barcode_sku,

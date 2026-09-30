@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
 
 # Weather
 class WeatherForecastResponse(BaseModel):
@@ -22,12 +23,12 @@ class RestockItemResponse(BaseModel):
     safety_stock: float
     estimated_cost: float
     priority: str  # high, medium, low
-    supplier_id: Optional[int] = None
-    supplier_name: Optional[str] = None
+    supplier_id: int | None = None
+    supplier_name: str | None = None
     lead_time_days: int
 
 class RestockSheetResponse(BaseModel):
-    items: List[RestockItemResponse]
+    items: list[RestockItemResponse]
     total_estimated_cost: float
     high_priority_count: int
     generated_at: datetime
@@ -49,6 +50,6 @@ class RecipeScalerItemResponse(BaseModel):
 class RecipeScalerResponse(BaseModel):
     menu_name: str
     target_portions: int
-    items: List[RecipeScalerItemResponse]
+    items: list[RecipeScalerItemResponse]
     all_sufficient: bool
     total_estimated_cost: float

@@ -1,24 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
-from sqlalchemy.orm import Session
-from sqlalchemy import func, or_
-from typing import Optional
 import csv
 import io
+from datetime import UTC
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_db, verify_license
-from app.schemas.ingredient_schema import (
-    IngredientCreate,
-    IngredientUpdate,
-    IngredientResponse,
-    IngredientListResponse,
-    StockOpnameRequest,
-    StockOpnameResponse,
-    ValuationSummary,
-    ValuationItem,
-)
 from app.models.ingredient import Ingredient
 from app.models.transaction import IngredientDailyUsage
-from app.core.config import settings
+from app.schemas.ingredient_schema import (
+    IngredientCreate,
+    IngredientListResponse,
+    IngredientResponse,
+    IngredientUpdate,
+    StockOpnameRequest,
+    StockOpnameResponse,
+    ValuationItem,
+    ValuationSummary,
+)
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
 
@@ -28,14 +28,14 @@ def list_ingredients(
     license_info: dict = Depends(verify_license),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    search: Optional[str] = Query(None),
+    search: str | None = Query(None),
     active_only: bool = Query(True),
 ):
     """List all ingredients with pagination and search."""
     query = db.query(Ingredient)
 
     if active_only:
-        query = query.filter(Ingredient.is_active == True)
+        query = query.filter(Ingredient.is_active)
 
     if search:
         search_term = f"%{search}%"
@@ -166,7 +166,7 @@ def get_valuation_summary(
     license_info: dict = Depends(verify_license),
 ):
     """Get warehouse valuation summary."""
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active == True).all()
+    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     total_valuation = sum(
         float(ing.current_stock) * float(ing.cost_per_unit) for ing in ingredients
@@ -193,7 +193,7 @@ def get_valuation_items(
     license_info: dict = Depends(verify_license),
 ):
     """Get detailed valuation per ingredient."""
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active == True).all()
+    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     return [
         ValuationItem(
@@ -216,7 +216,7 @@ def export_valuation_csv(
     license_info: dict = Depends(verify_license),
 ):
     """Export valuation report as CSV."""
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active == True).all()
+    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -252,13 +252,13 @@ def export_valuation_csv(
 def get_usage_trend(
     db: Session = Depends(get_db),
     license_info: dict = Depends(verify_license),
-    ingredient_id: Optional[int] = Query(None),
+    ingredient_id: int | None = Query(None),
     days: int = Query(30, ge=1, le=365),
 ):
     """Get ingredient usage trend for charting."""
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
-    end_date = datetime.now(timezone.utc)
+    end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)
 
     query = db.query(IngredientDailyUsage).filter(
@@ -289,7 +289,7 @@ def get_critical_alerts(
     license_info: dict = Depends(verify_license),
 ):
     """Get critical alerts (low stock, expiring soon)."""
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active == True).all()
+    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     alerts = []
     for ing in ingredients:

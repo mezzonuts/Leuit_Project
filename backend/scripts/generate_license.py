@@ -4,11 +4,14 @@ Generate local license file for development.
 Uses dev_private_key.hex to sign a license token.
 """
 import json
-import time
-import nacl.signing
 import os
+import time
 from pathlib import Path
+
+import nacl.signing
+
 from app.core.security.hardware import get_machine_fingerprint
+
 
 def generate_license(
     license_id: str = "DEV-LOCAL-001",
@@ -35,7 +38,7 @@ def generate_license(
         print("   Run: python scripts/generate_keys.py first")
         return False
 
-    with open(private_key_path, "r") as f:
+    with open(private_key_path) as f:
         private_key_hex = f.read().strip()
 
     if not private_key_hex:
@@ -84,7 +87,7 @@ def generate_license(
 
     print("\n[OK] License generated successfully!")
     print(f"[Saved] Saved to: {output_path}")
-    print(f"\n[License Details]")
+    print("\n[License Details]")
     print(f"   License ID: {license_id}")
     print(f"   Hardware ID: {hardware_id}")
     print(f"   Valid Until: {time.ctime(payload['valid_until'])} ({valid_days} days)")

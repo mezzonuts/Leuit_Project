@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey, Index
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
+
 
 class Supplier(Base):
     __tablename__ = "suppliers"
@@ -17,14 +18,14 @@ class Supplier(Base):
     # Relationships
     purchases = relationship("InventoryPurchase", back_populates="supplier")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Supplier(id={self.id}, name='{self.name}', terms={self.payment_terms_days})>"
 
     @property
     def is_credit(self) -> bool:
-        return self.payment_terms_days > 0
+        return bool(self.payment_terms_days > 0)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "name": self.name,
