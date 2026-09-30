@@ -118,6 +118,7 @@ export default function IngredientDrawer({ onClose }: IngredientDrawerProps) {
                 type="button"
                 onClick={() => {}}
                 className="btn-secondary flex items-center gap-1"
+                aria-label="Scan barcode"
               >
                 <Camera className="h-4 w-4" />
               </button>
@@ -220,7 +221,7 @@ export default function IngredientDrawer({ onClose }: IngredientDrawerProps) {
             disabled={isSubmitting}
             className="btn-primary flex items-center gap-2"
           >
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" role="status" aria-label="Menyimpan..." /> : <Save className="h-4 w-4" />}
             {isOpname ? 'Simpan Penyesuaian' : 'Simpan'}
           </button>
         </div>
