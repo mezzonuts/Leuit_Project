@@ -29,7 +29,7 @@
 |------|-------|-------------|
 | **1** | **Repo Init & CI/CD** ✅ | `git init`, folder structure, GitHub Actions workflow, GitLab CI mirror, README, `.gitignore`, `pnpm-workspace.yaml`, `pyproject.toml` — merged to staging |
 | **2** | **Backend: SQLCipher + Dual-Key Auth** ✅ | `app/core/security/` (hardware.py, licensing.py, key_envelope.py), `app/core/database.py` (SQLCipher engine), middleware license guard — PR #3 merged |
-| **3** | **Backend: Auth API & Models** | `/api/v1/auth/unlock`, `/api/v1/auth/status`, models: `ingredients`, `suppliers`, `menu_items`, `recipe_items`, `sales_transactions`, `pos_sync_logs`, `operational_audit_logs`, `security_keyring` |
+| **3** | **Backend: Auth API & Models** ✅ | All models verified, 59 new tests (model properties, to_dict, repr, auth schemas), PR #4 merged |
 | **4** | **Backend: Inventory CRUD + Valuation** | Router `/inventory` (CRUD, stock-opname, threshold), `/valuation` + CSV export streaming |
 | **5** | **Backend: POS Sync Engine** | `/sync/pos-csv` (SHA-256 deduplikasi, auto stock deduction via BOM), `services/pos_reconciler.py` |
 | **6** | **Frontend: Vite + React + Tailwind + Auth UI** | `DatabaseUnlockModal.tsx`, `KeyStatusIndicator.tsx`, Sidebar layout, routing, TanStack Query setup |
