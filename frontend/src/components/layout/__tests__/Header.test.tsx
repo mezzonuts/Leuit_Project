@@ -3,7 +3,9 @@ import Header from '../Header'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 // Create a mutable mock store
-const mockStore = {
+const mockStore: {
+  licenseGraceDays: number | null
+} = {
   licenseGraceDays: null,
 }
 
