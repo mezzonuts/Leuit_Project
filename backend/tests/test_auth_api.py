@@ -7,7 +7,7 @@ from datetime import datetime
 import pytest
 
 
-def _make_rate_limiter():
+def _make_rate_limiter() -> dict[str, object]:
     ns = {"defaultdict": defaultdict, "time": time}
     exec(
         "from collections import defaultdict\n"
@@ -31,30 +31,30 @@ def _make_rate_limiter():
 class TestRateLimiting:
     """Test in-memory rate limiter unlock attempts."""
 
-    def _reset_rate_limiter(self):
+    def _reset_rate_limiter(self) -> None:
         self._ns = _make_rate_limiter()
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self._reset_rate_limiter()
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         self._reset_rate_limiter()
 
-    def test_first_attempt_allowed(self):
+    def test_first_attempt_allowed(self) -> None:
         assert self._ns["_check_rate_limit"]("127.0.0.1") is True
 
-    def test_five_attempts_allowed(self):
+    def test_five_attempts_allowed(self) -> None:
         fn = self._ns["_check_rate_limit"]
         for _ in range(5):
             assert fn("127.0.0.1") is True
 
-    def test_sixth_attempt_blocked(self):
+    def test_sixth_attempt_blocked(self) -> None:
         fn = self._ns["_check_rate_limit"]
         for _ in range(5):
             fn("127.0.0.1")
         assert fn("127.0.0.1") is False
 
-    def test_different_ips_independent(self):
+    def test_different_ips_independent(self) -> None:
         fn = self._ns["_check_rate_limit"]
         for _ in range(5):
             fn("127.0.0.1")
@@ -67,14 +67,14 @@ class TestRateLimiting:
 
 
 class TestUnlockRequestSchema:
-    def test_valid_unlock_request(self):
+    def test_valid_unlock_request(self) -> None:
         from app.schemas.auth_schema import UnlockRequest
 
         req = UnlockRequest(passkey="my-passphrase-123")
         assert req.passkey == "my-passphrase-123"
         assert req.is_developer is False
 
-    def test_unlock_request_min_length_rejection(self):
+    def test_unlock_request_min_length_rejection(self) -> None:
         from pydantic import ValidationError
 
         from app.schemas.auth_schema import UnlockRequest
@@ -84,14 +84,14 @@ class TestUnlockRequestSchema:
 
 
 class TestInitializeRequestSchema:
-    def test_valid_initialize_request(self):
+    def test_valid_initialize_request(self) -> None:
         from app.schemas.auth_schema import InitializeRequest
 
         req = InitializeRequest(owner_passkey="secure-pin-123")
         assert req.owner_passkey == "secure-pin-123"
         assert req.license_id == "DEV-LOCAL-001"
 
-    def test_initialize_request_min_length_rejection(self):
+    def test_initialize_request_min_length_rejection(self) -> None:
         from pydantic import ValidationError
 
         from app.schemas.auth_schema import InitializeRequest
@@ -101,7 +101,7 @@ class TestInitializeRequestSchema:
 
 
 class TestAuthStatusResponse:
-    def test_locked_status(self):
+    def test_locked_status(self) -> None:
         from app.schemas.auth_schema import AuthStatusResponse
 
         resp = AuthStatusResponse(
@@ -114,7 +114,7 @@ class TestAuthStatusResponse:
         assert resp.is_locked is True
         assert resp.role == "UNAUTHENTICATED"
 
-    def test_active_license_status(self):
+    def test_active_license_status(self) -> None:
         from app.schemas.auth_schema import AuthStatusResponse
 
         resp = AuthStatusResponse(

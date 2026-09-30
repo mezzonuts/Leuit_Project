@@ -36,44 +36,44 @@ for _name, _stub in _stubbed.items():
 
 
 class TestEscapePragmaKey:
-    def test_plain_key_unchanged(self):
+    def test_plain_key_unchanged(self) -> None:
         assert _escape_pragma_key("simple-key-123") == "simple-key-123"
 
-    def test_single_quotes_escaped(self):
+    def test_single_quotes_escaped(self) -> None:
         assert _escape_pragma_key("key'with'quotes") == "key''with''quotes"
 
-    def test_empty_string(self):
+    def test_empty_string(self) -> None:
         assert _escape_pragma_key("") == ""
 
-    def test_hex_key(self):
+    def test_hex_key(self) -> None:
         hex_key = "abcdef0123456789"
         assert _escape_pragma_key(hex_key) == hex_key
 
-    def test_key_with_single_quote_at_start(self):
+    def test_key_with_single_quote_at_start(self) -> None:
         assert _escape_pragma_key("'start") == "''start"
 
-    def test_key_with_single_quote_at_end(self):
+    def test_key_with_single_quote_at_end(self) -> None:
         assert _escape_pragma_key("end'") == "end''"
 
-    def test_multiple_consecutive_quotes(self):
+    def test_multiple_consecutive_quotes(self) -> None:
         assert _escape_pragma_key("a''b") == "a''''b"
 
-    def test_only_quotes(self):
+    def test_only_quotes(self) -> None:
         assert _escape_pragma_key("''") == "''''"
 
 
 class TestGetDatabaseUrl:
-    def test_returns_sqlite_url(self):
+    def test_returns_sqlite_url(self) -> None:
         with patch.object(db_mod.settings, "DATABASE_PATH", "/tmp/test.db"):
             url = get_database_url("test-key")
             assert url == "sqlite+pysqlcipher:////tmp/test.db"
 
-    def test_ignores_encryption_key_in_url(self):
+    def test_ignores_encryption_key_in_url(self) -> None:
         with patch.object(db_mod.settings, "DATABASE_PATH", "/tmp/test.db"):
             url = get_database_url("any-key")
             assert "pysqlcipher" in url
 
-    def test_uses_settings_database_path(self):
+    def test_uses_settings_database_path(self) -> None:
         with patch.object(db_mod.settings, "DATABASE_PATH", "/custom/path/db.sqlite"):
             url = get_database_url("key")
             assert "/custom/path/db.sqlite" in url
@@ -86,7 +86,7 @@ class TestSessionScope:
             with session_scope():
                 pass
 
-    def test_calls_rollback_on_exception(self):
+    def test_calls_rollback_on_exception(self) -> None:
         mock_session = MagicMock()
         db_mod._SessionLocal = MagicMock(return_value=mock_session)
 
@@ -98,7 +98,7 @@ class TestSessionScope:
         mock_session.close.assert_called_once()
         mock_session.commit.assert_not_called()
 
-    def test_calls_commit_on_success(self):
+    def test_calls_commit_on_success(self) -> None:
         mock_session = MagicMock()
         db_mod._SessionLocal = MagicMock(return_value=mock_session)
 
@@ -109,7 +109,7 @@ class TestSessionScope:
         mock_session.close.assert_called_once()
         mock_session.rollback.assert_not_called()
 
-    def test_always_closes_session(self):
+    def test_always_closes_session(self) -> None:
         mock_session = MagicMock()
         db_mod._SessionLocal = MagicMock(return_value=mock_session)
 
@@ -118,7 +118,7 @@ class TestSessionScope:
 
         mock_session.close.assert_called_once()
 
-    def test_yields_session_instance(self):
+    def test_yields_session_instance(self) -> None:
         mock_session = MagicMock()
         db_mod._SessionLocal = MagicMock(return_value=mock_session)
 
@@ -127,12 +127,12 @@ class TestSessionScope:
 
 
 class TestGetEngine:
-    def test_raises_when_not_initialized(self):
+    def test_raises_when_not_initialized(self) -> None:
         db_mod._engine = None
         with pytest.raises(RuntimeError, match="Database not initialized"):
             get_engine()
 
-    def test_returns_engine_when_set(self):
+    def test_returns_engine_when_set(self) -> None:
         mock_engine = MagicMock()
         db_mod._engine = mock_engine
         assert get_engine() is mock_engine
@@ -140,13 +140,13 @@ class TestGetEngine:
 
 
 class TestGetSession:
-    def test_raises_when_not_initialized(self):
+    def test_raises_when_not_initialized(self) -> None:
         db_mod._SessionLocal = None
         gen = get_session()
         with pytest.raises(RuntimeError, match="Database not initialized"):
             next(gen)
 
-    def test_yields_and_closes_session(self):
+    def test_yields_and_closes_session(self) -> None:
         mock_session = MagicMock()
         db_mod._SessionLocal = MagicMock(return_value=mock_session)
 
@@ -163,9 +163,9 @@ class TestGetSession:
 
 
 class TestChangeEncryptionKey:
-    def test_returns_false_when_same_key(self):
+    def test_returns_false_when_same_key(self) -> None:
         assert change_encryption_key("same-key", "same-key") is False
 
-    def test_returns_false_on_exception(self):
+    def test_returns_false_on_exception(self) -> None:
         with patch.object(db_mod, "init_database", side_effect=Exception("fail")):
             assert change_encryption_key("old", "new") is False

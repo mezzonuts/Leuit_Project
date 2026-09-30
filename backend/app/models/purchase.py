@@ -42,7 +42,7 @@ class InventoryPurchase(Base):
         Index("ix_purchases_due_date_status", "due_date", "payment_status"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<InventoryPurchase(id={self.id}, ingredient={self.ingredient_id}, cost={self.total_cost})>"
 
     @property
@@ -60,7 +60,7 @@ class InventoryPurchase(Base):
             return max(0, delta.days)
         return 0
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "purchase_date": self.purchase_date.isoformat() if self.purchase_date else None,
@@ -95,10 +95,10 @@ class OperationalAuditLog(Base):
         Index("ix_audit_action_entity", "action_type", "entity_name"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<OperationalAuditLog(action={self.action_type}, entity={self.entity_name})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "action_type": self.action_type,

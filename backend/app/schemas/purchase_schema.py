@@ -40,7 +40,7 @@ class PurchaseBase(BaseModel):
 
 class PurchaseCreate(PurchaseBase):
     @classmethod
-    def validate_due_date(cls, values):
+    def validate_due_date(cls, values: "PurchaseCreate") -> "PurchaseCreate":
         if values.payment_method == PaymentMethod.CREDIT and values.payment_status == PaymentStatus.UNPAID:
             if not values.due_date:
                 raise ValueError("due_date required for CREDIT UNPAID purchases")

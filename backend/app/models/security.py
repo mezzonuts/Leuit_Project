@@ -13,7 +13,7 @@ class SecurityKeyring(Base):
     last_key_rotation = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<SecurityKeyring(rotation={self.last_key_rotation})>"
 
 class SecurityAuditClock(Base):
@@ -23,7 +23,7 @@ class SecurityAuditClock(Base):
     last_seen_timestamp = Column(Integer, nullable=False)  # Unix timestamp
     recorded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<SecurityAuditClock(ts={self.last_seen_timestamp})>"
 
 class AppLicense(Base):
@@ -36,7 +36,7 @@ class AppLicense(Base):
     grace_period_end = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<AppLicense(valid_until={self.valid_until})>"
 
 class SecurityUnlockAudit(Base):
@@ -49,5 +49,5 @@ class SecurityUnlockAudit(Base):
     ip_address = Column(String(45), nullable=True)  # IPv4 or IPv6
     failure_reason = Column(Text, nullable=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<SecurityUnlockAudit(role={self.role}, success={self.success})>"

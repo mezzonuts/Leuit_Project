@@ -30,10 +30,10 @@ class MenuItem(Base):
     recipes = relationship("RecipeItem", back_populates="menu_item", cascade="all, delete-orphan")
     sales = relationship("SalesTransaction", back_populates="menu_item")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<MenuItem(id={self.id}, name='{self.name}', price={self.sale_price})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "pos_item_id": self.pos_item_id,
@@ -63,7 +63,7 @@ class RecipeItem(Base):
         Index("ix_recipe_menu_ingredient", "menu_item_id", "ingredient_id"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<RecipeItem(menu={self.menu_item_id}, ingredient={self.ingredient_id}, qty={self.quantity_required})>"
 
     @property
@@ -73,7 +73,7 @@ class RecipeItem(Base):
             return round(float(self.quantity_required) * float(self.ingredient.cost_per_unit), 2)
         return 0.0
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "menu_item_id": self.menu_item_id,

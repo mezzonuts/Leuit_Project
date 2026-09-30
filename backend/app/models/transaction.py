@@ -36,10 +36,10 @@ class SalesTransaction(Base):
         Index("ix_sales_sync_log_time", "sync_log_id", "transaction_time"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<SalesTransaction(hash={self.transaction_hash[:8]}..., qty={self.quantity})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "transaction_hash": self.transaction_hash,
@@ -67,10 +67,10 @@ class PosSyncLog(Base):
     # Relationships
     transactions = relationship("SalesTransaction", back_populates="sync_log")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<PosSyncLog(id={self.id}, file='{self.file_name}', new={self.new_rows_inserted})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "file_name": self.file_name,
@@ -101,10 +101,10 @@ class IngredientDailyUsage(Base):
         Index("ix_daily_usage_date_ingredient", "usage_date", "ingredient_id"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<IngredientDailyUsage(ingredient={self.ingredient_id}, date={self.usage_date}, qty={self.total_quantity_used})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "usage_date": self.usage_date.isoformat() if self.usage_date else None,

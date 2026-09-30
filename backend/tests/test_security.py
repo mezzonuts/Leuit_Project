@@ -8,13 +8,13 @@ from nacl.public import PrivateKey
 # ── KeyEnvelope Tests ──
 
 class TestKeyEnvelope:
-    def test_generate_dek_returns_32_bytes(self):
+    def test_generate_dek_returns_32_bytes(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         dek = KeyEnvelope.generate_dek()
         assert len(dek) == 32
 
-    def test_owner_encrypt_decrypt_roundtrip(self):
+    def test_owner_encrypt_decrypt_roundtrip(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         dek = KeyEnvelope.generate_dek()
@@ -22,7 +22,7 @@ class TestKeyEnvelope:
         decrypted = KeyEnvelope.decrypt_dek_for_owner(encrypted, "my-passkey-123")
         assert decrypted == dek
 
-    def test_owner_wrong_passkey_fails(self):
+    def test_owner_wrong_passkey_fails(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         dek = KeyEnvelope.generate_dek()
@@ -30,7 +30,7 @@ class TestKeyEnvelope:
         with pytest.raises(ValueError, match="Invalid passkey"):
             KeyEnvelope.decrypt_dek_for_owner(encrypted, "wrong-passkey")
 
-    def test_different_passkeys_produce_different_ciphertext(self):
+    def test_different_passkeys_produce_different_ciphertext(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         dek = KeyEnvelope.generate_dek()
@@ -38,7 +38,7 @@ class TestKeyEnvelope:
         enc_b, _ = KeyEnvelope.encrypt_dek_for_owner(dek, "passkey-b")
         assert enc_a != enc_b
 
-    def test_developer_encrypt_decrypt_roundtrip(self):
+    def test_developer_encrypt_decrypt_roundtrip(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         privkey = PrivateKey.generate()
@@ -47,7 +47,7 @@ class TestKeyEnvelope:
         decrypted = KeyEnvelope.decrypt_dek_for_developer(encrypted, privkey)
         assert decrypted == dek
 
-    def test_developer_wrong_key_fails(self):
+    def test_developer_wrong_key_fails(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         dek = KeyEnvelope.generate_dek()
@@ -55,7 +55,7 @@ class TestKeyEnvelope:
         with pytest.raises(ValueError):
             KeyEnvelope.decrypt_dek_for_developer(encrypted, PrivateKey.generate())
 
-    def test_create_and_open_envelope_owner(self):
+    def test_create_and_open_envelope_owner(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         privkey = PrivateKey.generate()
@@ -69,7 +69,7 @@ class TestKeyEnvelope:
         recovered = KeyEnvelope.open_envelope_owner(envelope, "owner-pin")
         assert recovered == dek
 
-    def test_create_and_open_envelope_developer(self):
+    def test_create_and_open_envelope_developer(self) -> None:
         from app.core.security.key_envelope import KeyEnvelope
 
         privkey = PrivateKey.generate()
@@ -79,7 +79,7 @@ class TestKeyEnvelope:
         recovered = KeyEnvelope.open_envelope_developer(envelope, privkey)
         assert recovered == dek
 
-    def test_dek_size_constants(self):
+    def test_dek_size_constants(self) -> None:
         from app.core.security.key_envelope import DEK_SIZE, NONCE_SIZE, SALT_SIZE
 
         assert DEK_SIZE == 32
@@ -90,14 +90,14 @@ class TestKeyEnvelope:
 # ── Hardware Fingerprint Tests ──
 
 class TestHardwareFingerprint:
-    def test_returns_64_char_hex(self):
+    def test_returns_64_char_hex(self) -> None:
         from app.core.security.hardware import get_machine_fingerprint
 
         fp = get_machine_fingerprint()
         assert len(fp) == 64
         assert all(c in "0123456789abcdef" for c in fp)
 
-    def test_is_deterministic(self):
+    def test_is_deterministic(self) -> None:
         from app.core.security.hardware import get_machine_fingerprint
 
         get_machine_fingerprint.cache_clear()
@@ -105,7 +105,7 @@ class TestHardwareFingerprint:
         fp2 = get_machine_fingerprint()
         assert fp1 == fp2
 
-    def test_hardware_info_returns_dict(self):
+    def test_hardware_info_returns_dict(self) -> None:
         from app.core.security.hardware import get_hardware_info
 
         info = get_hardware_info()
@@ -116,7 +116,7 @@ class TestHardwareFingerprint:
 # ── Licensing Tests ──
 
 class TestLicenseData:
-    def test_from_dict_roundtrip(self):
+    def test_from_dict_roundtrip(self) -> None:
         from app.core.security.licensing import LicenseData
 
         data = {
@@ -131,7 +131,7 @@ class TestLicenseData:
         d = ld.to_dict()
         assert d["license_id"] == "TEST-001"
 
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         from app.core.security.licensing import LicenseData
 
         ld = LicenseData("L-1", "hw", 100, 0)
@@ -140,7 +140,7 @@ class TestLicenseData:
 
 
 class TestLicenseStatus:
-    def test_active_license(self):
+    def test_active_license(self) -> None:
         from app.core.security.licensing import LicenseData, evaluate_license_status
 
         future = int(time.time()) + 86400 * 30
@@ -149,7 +149,7 @@ class TestLicenseStatus:
         assert result["status"] == "ACTIVE"
         assert result["days_left"] > 0
 
-    def test_expired_in_grace_period(self):
+    def test_expired_in_grace_period(self) -> None:
         from app.core.security.licensing import LicenseData, evaluate_license_status
 
         past = int(time.time()) - 86400 * 1
@@ -157,7 +157,7 @@ class TestLicenseStatus:
         result = evaluate_license_status(ld)
         assert result["status"] == "GRACE_PERIOD"
 
-    def test_expired_locked(self):
+    def test_expired_locked(self) -> None:
         from app.core.security.licensing import LicenseData, evaluate_license_status
 
         old = int(time.time()) - 86400 * 30
@@ -168,7 +168,7 @@ class TestLicenseStatus:
 
 
 class TestHardwareBinding:
-    def test_matching_fingerprint(self):
+    def test_matching_fingerprint(self) -> None:
         from app.core.security.hardware import get_machine_fingerprint
         from app.core.security.licensing import LicenseData, check_hardware_binding
 
@@ -176,7 +176,7 @@ class TestHardwareBinding:
         ld = LicenseData("L-4", fp, int(time.time()), int(time.time()))
         assert check_hardware_binding(ld) is True
 
-    def test_mismatched_fingerprint(self):
+    def test_mismatched_fingerprint(self) -> None:
         from app.core.security.licensing import LicenseData, check_hardware_binding
 
         ld = LicenseData("L-5", "WRONG_FINGERPRINT", int(time.time()), int(time.time()))
@@ -184,14 +184,14 @@ class TestHardwareBinding:
 
 
 class TestMonotonicClock:
-    def test_valid_clock(self):
+    def test_valid_clock(self) -> None:
         from app.core.security.licensing import check_monotonic_clock
 
         mock_db = MagicMock()
         mock_db.execute.return_value.scalar.return_value = 0
         assert check_monotonic_clock(mock_db) is True
 
-    def test_clock_manipulation_detected(self):
+    def test_clock_manipulation_detected(self) -> None:
         from app.core.security.licensing import check_monotonic_clock
 
         mock_db = MagicMock()
@@ -201,7 +201,7 @@ class TestMonotonicClock:
 
 
 class TestSecurityException:
-    def test_is_exception(self):
+    def test_is_exception(self) -> None:
         from app.core.security.licensing import SecurityException
 
         assert issubclass(SecurityException, Exception)

@@ -32,7 +32,7 @@ class Ingredient(Base):
         Index("ix_ingredients_stock_threshold", "current_stock", "min_stock_threshold"),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Ingredient(id={self.id}, name='{self.name}', stock={self.current_stock})>"
 
     @property
@@ -62,7 +62,7 @@ class Ingredient(Base):
         """Estimated days until expiry (simplified)."""
         return self.shelf_life_days
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "barcode_sku": self.barcode_sku,
