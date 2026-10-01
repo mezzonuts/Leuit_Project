@@ -133,7 +133,6 @@ describe('IngredientDrawer', () => {
   })
 
   it('shows validation error for empty name', async () => {
-    const user = userEvent.setup()
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
@@ -146,7 +145,6 @@ describe('IngredientDrawer', () => {
   })
 
   it('shows validation error for negative cost', async () => {
-    const user = userEvent.setup()
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
@@ -163,7 +161,6 @@ describe('IngredientDrawer', () => {
   })
 
   it('shows validation error for shelf_life_days < 1', async () => {
-    const user = userEvent.setup()
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
@@ -180,13 +177,12 @@ describe('IngredientDrawer', () => {
   })
 
   it('shows validation error for negative stock', async () => {
-    const user = userEvent.setup()
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
     const stockInput = screen.getByPlaceholderText('Contoh: 50')
     await userEvent.clear(stockInput)
-    await userEvent.type(stockInput, '-10')
+    fireEvent.change(stockInput, { target: { value: '-10' } })
 
     const submitButton = screen.getByRole('button', { name: /simpan/i })
     await userEvent.click(submitButton)
@@ -197,13 +193,12 @@ describe('IngredientDrawer', () => {
   })
 
   it('shows validation error for negative threshold', async () => {
-    const user = userEvent.setup()
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
     const thresholdInput = screen.getByPlaceholderText('Contoh: 10')
     await userEvent.clear(thresholdInput)
-    await userEvent.type(thresholdInput, '-5')
+    fireEvent.change(thresholdInput, { target: { value: '-5' } })
 
     const submitButton = screen.getByRole('button', { name: /simpan/i })
     await userEvent.click(submitButton)
@@ -217,7 +212,7 @@ describe('IngredientDrawer', () => {
     const { api } = await import('@/services/api')
     vi.mocked(api.post).mockResolvedValueOnce({})
 
-    const user = userEvent.setup()
+    
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
@@ -252,7 +247,7 @@ describe('IngredientDrawer', () => {
     const { api } = await import('@/services/api')
     vi.mocked(api.put).mockResolvedValueOnce({})
 
-    const user = userEvent.setup()
+    
     setDrawerData({ mode: 'edit', ingredient: mockIngredient })
     renderDrawer()
 
@@ -268,7 +263,7 @@ describe('IngredientDrawer', () => {
     const { api } = await import('@/services/api')
     vi.mocked(api.post).mockResolvedValueOnce({})
 
-    const user = userEvent.setup()
+    
     setDrawerData({ mode: 'opname', ingredient: mockIngredient })
     renderDrawer()
 
@@ -288,11 +283,12 @@ describe('IngredientDrawer', () => {
     const { api } = await import('@/services/api')
     vi.mocked(api.post).mockResolvedValueOnce({})
 
+    
+    
+
+    setDrawerData({ mode: 'create' })
+
     const onClose = vi.fn()
-    const user = userEvent.setup()
-
-    mockStore.drawerData = { mode: 'create' }
-
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(
       <QueryClientProvider client={queryClient}>
@@ -324,7 +320,7 @@ describe('IngredientDrawer', () => {
     const promise = new Promise((resolve) => { resolvePromise = resolve })
     vi.mocked(api.post).mockReturnValueOnce(promise)
 
-    const user = userEvent.setup()
+    
     setDrawerData({ mode: 'create' })
     renderDrawer()
 
@@ -362,7 +358,7 @@ describe('IngredientDrawer', () => {
   })
 
   it('closes drawer when Batal clicked', () => {
-    const onClose = vi.fn()
+    
     setDrawerData({ mode: 'create' })
     renderDrawer()
 

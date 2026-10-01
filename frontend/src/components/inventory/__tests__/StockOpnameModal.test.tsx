@@ -11,16 +11,13 @@ vi.mock('@/services/api', () => ({
   },
 }))
 
-vi.mock('@/utils/formatters', async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual,
-    formatNumber: vi.fn((val) => val.toLocaleString('id-ID')),
-  }
-})
+vi.mock('@/utils/formatters', () => ({
+  cn: (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(' '),
+  formatNumber: vi.fn((val) => val.toLocaleString('id-ID')),
+}))
 
 // Create a mutable mock store
-const mockStore = {
+const mockStore: any = {
   drawerData: { ingredient: null },
 }
 
@@ -136,7 +133,6 @@ describe('StockOpnameModal', () => {
   })
 
   it('shows validation error for negative quantity', async () => {
-    const user = userEvent.setup()
     renderModal()
 
     const quantityInput = screen.getByPlaceholderText('Masukkan jumlah stok fisik')
@@ -154,7 +150,6 @@ describe('StockOpnameModal', () => {
     const { api } = await import('@/services/api')
     vi.mocked(api.post).mockResolvedValueOnce({})
 
-    const user = userEvent.setup()
     renderModal()
 
     const quantityInput = screen.getByPlaceholderText('Masukkan jumlah stok fisik')
@@ -173,7 +168,6 @@ describe('StockOpnameModal', () => {
     vi.mocked(api.post).mockResolvedValueOnce({})
 
     const onClose = vi.fn()
-    const user = userEvent.setup()
 
     const originalStore = currentStore
     const testStore = { drawerData: { ingredient: mockIngredient } }
@@ -200,7 +194,6 @@ describe('StockOpnameModal', () => {
     const promise = new Promise((resolve) => { resolvePromise = resolve })
     vi.mocked(api.post).mockReturnValueOnce(promise)
 
-    const user = userEvent.setup()
     renderModal()
 
     const quantityInput = screen.getByPlaceholderText('Masukkan jumlah stok fisik')

@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Inventory from '../Inventory'
-import { useUIStore } from '@/stores'
 
 // Mock dependencies
 vi.mock('@/services/api', () => ({
