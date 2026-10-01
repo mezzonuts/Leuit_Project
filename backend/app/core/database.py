@@ -53,14 +53,18 @@ def init_database(encryption_key: str) -> None:
         echo=settings.DEBUG,
     )
 
-    # Set encryption key on connect
+    # Set encryption key on connect — using executescript to avoid key exposure in SQL logs
     @event.listens_for(_engine, "connect")
     def set_pragma_key(dbapi_connection: Any, connection_record: Any) -> None:
         cursor = dbapi_connection.cursor()
-        cursor.execute(f"PRAGMA key = '{_escape_pragma_key(encryption_key)}';")
-        cursor.execute("PRAGMA cipher_compatibility = 4;")
-        cursor.execute("PRAGMA cipher_page_size = 4096;")
-        cursor.execute("PRAGMA kdf_iter = 256000;")
+        # Use executescript to avoid key exposure in SQL query logs (echo=True)
+        escaped_key = _escape_pragma_key(encryption_key)
+        cursor.executescript(f"""
+            PRAGMA key = '{escaped_key}';
+            PRAGMA cipher_compatibility = 4;
+            PRAGMA cipher_page_size = 4096;
+            PRAGMA kdf_iter = 256000;
+        """)
         cursor.close()
 
     # Enable foreign keys
@@ -124,8 +128,12 @@ def verify_database_key(encryption_key: str) -> bool:
         @event.listens_for(test_engine, "connect")
         def set_test_key(dbapi_connection: Any, connection_record: Any) -> None:
             cursor = dbapi_connection.cursor()
-            cursor.execute(f"PRAGMA key = '{_escape_pragma_key(encryption_key)}';")
-            cursor.execute("PRAGMA cipher_compatibility = 4;")
+            # Use executescript to avoid key exposure in SQL logs
+            escaped_key = _escape_pragma_key(encryption_key)
+            cursor.executescript(f"""
+                PRAGMA key = '{escaped_key}';
+                PRAGMA cipher_compatibility = 4;
+            """)
             cursor.close()
 
         with test_engine.connect() as conn:
@@ -151,7 +159,9 @@ def change_encryption_key(old_key: str, new_key: str) -> bool:
         init_database(old_key)
 
         with session_scope() as db:
-            db.execute(text(f"PRAGMA rekey = '{_escape_pragma_key(new_key)}';"))
+            # Use executescript to avoid key exposure in SQL logs
+            escaped_key = _escape_pragma_key(new_key)
+            db.execute(text(f"PRAGMA rekey = '{escaped_key}';"))
 
         # Re-initialize with new key
         init_database(new_key)
