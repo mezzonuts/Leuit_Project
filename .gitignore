@@ -46,6 +46,7 @@ htmlcov/
 
 # PyInstaller
 *.spec
+!backend/LeuitApp.spec
 dist/
 build/
 
