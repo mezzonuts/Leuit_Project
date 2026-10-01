@@ -44,7 +44,7 @@
 | **8** | **Frontend: Dashboard Monitoring** ✅ | ValuationMetricCard, UsageTrendBarChart, CriticalAlertsSection, StockHealthTable tested (31 tests), PR #9 merged |
 | **9** | **Frontend: BOM + Recipe Scaler** ✅ | BOM, RecipeDrawer, RecipeScalerTool tested (23 tests), PR #10 merged |
 | **10** | **Frontend: Purchases Cash/Tempo** ✅ | Purchases, PurchaseEntryDrawer, RestockSheetView, AccountsPayableAlert tested (31 tests), PR #11 merged |
-| **11** | **Frontend: POS Sync UI** | `PosSyncDrawer.tsx` (drag-drop CSV), `SyncResultSummary.tsx` (new/duplicate cards), `SyncHistoryTable.tsx` |
+| **11** | **Frontend: POS Sync UI** ✅ | Sync, PosSyncDrawer, SyncResultSummary, SyncHistoryTable tested (33 tests), PR #12 merged |
 | **12** | **Backend: Forecasting & Weather** | `services/forecaster.py` (Prophet + BMKG Bandung), `services/weather_client.py`, `/forecast/restock-sheet` |
 | **13** | **Integration & Hardening** | PyArmor obfuscation (security modules), PyInstaller spec, `main.py` launcher (auto-open browser), license grace banner |
 | **14** | **QA, Code Review, Bug Fix, Report** | Full test run, lint/typecheck, security audit, performance check, generate `RELEASE_REPORT.md` |
