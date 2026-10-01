@@ -41,7 +41,7 @@
 
 | Hari | Fokus | Deliverable |
 |------|-------|-------------|
-| **8** | **Frontend: Dashboard Monitoring** | `ValuationMetricCard.tsx` (CSV export), `UsageTrendBarChart.tsx` (Recharts 30 hari + filter), `CriticalAlertsSection.tsx` (pulse icon <3 hari), `StockHealthTable.tsx` (progress bar threshold) |
+| **8** | **Frontend: Dashboard Monitoring** ✅ | ValuationMetricCard, UsageTrendBarChart, CriticalAlertsSection, StockHealthTable tested (31 tests), PR #9 merged |
 | **9** | **Frontend: BOM + Recipe Scaler** | `RecipeList.tsx`, `RecipeDrawer.tsx`, `RecipeScalerTool.tsx` (simulasi porsi vs stok real-time) |
 | **10** | **Frontend: Purchases Cash/Tempo** | `PurchaseEntryDrawer.tsx`, `RestockSheetView.tsx`, `AccountsPayableAlert.tsx` (jatuh tempo) |
 | **11** | **Frontend: POS Sync UI** | `PosSyncDrawer.tsx` (drag-drop CSV), `SyncResultSummary.tsx` (new/duplicate cards), `SyncHistoryTable.tsx` |
