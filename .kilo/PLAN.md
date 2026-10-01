@@ -46,7 +46,7 @@
 | **10** | **Frontend: Purchases Cash/Tempo** ✅ | Purchases, PurchaseEntryDrawer, RestockSheetView, AccountsPayableAlert tested (31 tests), PR #11 merged |
 | **11** | **Frontend: POS Sync UI** ✅ | Sync, PosSyncDrawer, SyncResultSummary, SyncHistoryTable tested (33 tests), PR #12 merged |
 | **12** | **Backend: Forecasting & Weather** ✅ | weather_client.py, forecaster.py, 23 tests (forecasting + weather), PR #13 merged |
-| **13** | **Integration & Hardening** | PyArmor obfuscation (security modules), PyInstaller spec, `main.py` launcher (auto-open browser), license grace banner |
+| **13** | **Integration & Hardening** ✅ | PyArmor, PyInstaller, main.py launcher verified, 36 hardening tests, PR #14 merged |
 | **14** | **QA, Code Review, Bug Fix, Report** | Full test run, lint/typecheck, security audit, performance check, generate `RELEASE_REPORT.md` |
 
 ---
