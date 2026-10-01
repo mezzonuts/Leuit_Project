@@ -1,15 +1,18 @@
 """Unit tests for forecasting services."""
+from __future__ import annotations
+
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 
 class TestCalculateAvgDailyUsage:
-    def test_no_records_returns_zero(self):
+    def test_no_records_returns_zero(self) -> None:
         from app.services.forecaster import calculate_avg_daily_usage
         db = MagicMock()
         db.query.return_value.filter.return_value.all.return_value = []
         assert calculate_avg_daily_usage(db, 1) == 0.0
 
-    def test_single_record(self):
+    def test_single_record(self) -> None:
         from app.services.forecaster import calculate_avg_daily_usage
         record = MagicMock()
         record.total_quantity_used = 100.0
@@ -17,7 +20,7 @@ class TestCalculateAvgDailyUsage:
         db.query.return_value.filter.return_value.all.return_value = [record]
         assert calculate_avg_daily_usage(db, 1) == 100.0
 
-    def test_multiple_records(self):
+    def test_multiple_records(self) -> None:
         from app.services.forecaster import calculate_avg_daily_usage
         records = []
         for qty in [50.0, 100.0, 150.0]:
@@ -30,35 +33,35 @@ class TestCalculateAvgDailyUsage:
 
 
 class TestPredictConsumption:
-    def test_basic_prediction(self):
+    def test_basic_prediction(self) -> None:
         from app.services.forecaster import predict_consumption
         assert predict_consumption(10.0, 7) == 70.0
 
-    def test_zero_usage(self):
+    def test_zero_usage(self) -> None:
         from app.services.forecaster import predict_consumption
         assert predict_consumption(0.0, 7) == 0.0
 
-    def test_default_horizon(self):
+    def test_default_horizon(self) -> None:
         from app.services.forecaster import predict_consumption
         assert predict_consumption(10.0) == 70.0  # default 7 days
 
 
 class TestCalculateSafetyStock:
-    def test_basic_calculation(self):
+    def test_basic_calculation(self) -> None:
         from app.services.forecaster import calculate_safety_stock
         assert calculate_safety_stock(100.0) == 120.0  # 100 * 1.2
 
-    def test_custom_multiplier(self):
+    def test_custom_multiplier(self) -> None:
         from app.services.forecaster import calculate_safety_stock
         assert calculate_safety_stock(100.0, 1.5) == 150.0
 
-    def test_zero_threshold(self):
+    def test_zero_threshold(self) -> None:
         from app.services.forecaster import calculate_safety_stock
         assert calculate_safety_stock(0.0) == 0.0
 
 
 class TestCalculateRecommendedOrderQty:
-    def test_needs_ordering(self):
+    def test_needs_ordering(self) -> None:
         from app.services.forecaster import calculate_recommended_order_qty
         result = calculate_recommended_order_qty(
             current_stock=50.0,
@@ -68,7 +71,7 @@ class TestCalculateRecommendedOrderQty:
         )
         assert result == 240.0  # (200+60+30) - 50
 
-    def test_no_ordering_needed(self):
+    def test_no_ordering_needed(self) -> None:
         from app.services.forecaster import calculate_recommended_order_qty
         result = calculate_recommended_order_qty(
             current_stock=500.0,
@@ -78,7 +81,7 @@ class TestCalculateRecommendedOrderQty:
         )
         assert result == 0.0  # (200+60+30) - 500 = -210 → max(0, -210) = 0
 
-    def test_exact_stock(self):
+    def test_exact_stock(self) -> None:
         from app.services.forecaster import calculate_recommended_order_qty
         result = calculate_recommended_order_qty(
             current_stock=290.0,
@@ -90,38 +93,38 @@ class TestCalculateRecommendedOrderQty:
 
 
 class TestCalculatePriority:
-    def test_high_priority(self):
+    def test_high_priority(self) -> None:
         from app.services.forecaster import calculate_priority
         assert calculate_priority(50.0, 100.0) == "high"
 
-    def test_medium_priority(self):
+    def test_medium_priority(self) -> None:
         from app.services.forecaster import calculate_priority
         assert calculate_priority(120.0, 100.0) == "medium"
 
-    def test_low_priority(self):
+    def test_low_priority(self) -> None:
         from app.services.forecaster import calculate_priority
         assert calculate_priority(200.0, 100.0) == "low"
 
-    def test_zero_threshold(self):
+    def test_zero_threshold(self) -> None:
         from app.services.forecaster import calculate_priority
         assert calculate_priority(100.0, 0.0) == "low"
 
-    def test_exact_100_ratio(self):
+    def test_exact_100_ratio(self) -> None:
         from app.services.forecaster import calculate_priority
         assert calculate_priority(100.0, 100.0) == "medium"
 
-    def test_exact_150_ratio(self):
+    def test_exact_150_ratio(self) -> None:
         from app.services.forecaster import calculate_priority
         assert calculate_priority(150.0, 100.0) == "low"
 
 
 class TestWeatherClient:
-    def test_mock_forecast_returns_3_days(self):
+    def test_mock_forecast_returns_3_days(self) -> None:
         from app.services.weather_client import _mock_forecast
         result = _mock_forecast()
         assert len(result) == 3
 
-    def test_mock_forecast_fields(self):
+    def test_mock_forecast_fields(self) -> None:
         from app.services.weather_client import _mock_forecast
         result = _mock_forecast()
         assert "date" in result[0]
@@ -131,7 +134,7 @@ class TestWeatherClient:
         assert "rainfall_probability" in result[0]
         assert "weather_description" in result[0]
 
-    def test_parse_bmkg_response(self):
+    def test_parse_bmkg_response(self) -> None:
         from app.services.weather_client import _parse_bmkg_response
         raw = {
             "data": [
@@ -149,18 +152,17 @@ class TestWeatherClient:
         assert len(result) == 1
         assert result[0]["temperature_min"] == 22.0
 
-    def test_parse_empty_response(self):
+    def test_parse_empty_response(self) -> None:
         from app.services.weather_client import _parse_bmkg_response
         assert _parse_bmkg_response({}) == []
         assert _parse_bmkg_response({"data": []}) == []
 
-    def test_clear_cache(self):
+    def test_clear_cache(self) -> None:
         from app.services.weather_client import _cache, clear_cache
         _cache["test"] = ([], datetime_now())
         clear_cache()
         assert len(_cache) == 0
 
 
-def datetime_now():
-    from datetime import UTC, datetime
+def datetime_now() -> datetime:
     return datetime.now(UTC)
