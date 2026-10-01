@@ -33,7 +33,7 @@
 | **4** | **Backend: Inventory CRUD + Valuation** ✅ | Router verified (11 endpoints), 40 new tests, schema hardened (barcode regex, cost>0), PR #5 merged |
 | **5** | **Backend: POS Sync Engine** ✅ | Router verified (3 endpoints, 235 lines), 20 new tests (dedup, column mapping, BOM deduction), schema hardened, PR #6 merged |
 | **7** | **Frontend: Vite + React + Tailwind + Auth UI** ✅ | Auth components verified (11+7), Layout verified (10+12+11), 51 new tests, PR #7 merged |
-| **7** | **Frontend: Inventory CRUD + Slide-Over Drawer** ✅ | Components verified (Inventory, IngredientDrawer, StockOpnameModal, BarcodeCameraModal), 67 new tests, PR #8 merged |
+| **7** | **Frontend: Inventory CRUD + Slide-Over Drawer** ✅ | Inventory, IngredientDrawer, StockOpnameModal, BarcodeCameraModal tested, 67 new tests, TypeScript strict clean |
 
 ---
 
