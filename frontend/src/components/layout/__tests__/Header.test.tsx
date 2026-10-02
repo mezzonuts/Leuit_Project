@@ -13,6 +13,8 @@ vi.mock('@/stores', () => ({
   useUIStore: vi.fn(() => mockStore),
 }))
 
+vi.mock('../OutletSwitcher', () => ({ default: () => null }))
+
 const renderHeader = (props = {}) => {
   return render(<Header onMenuClick={vi.fn()} title="Test Page" {...props} />)
 }

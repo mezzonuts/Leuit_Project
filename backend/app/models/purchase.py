@@ -28,6 +28,7 @@ class InventoryPurchase(Base):
     total_cost = Column(Numeric(15, 2), nullable=False)
     payment_method = Column(SQLEnum(PaymentMethod), nullable=False, default=PaymentMethod.CASH)  # type: ignore[var-annotated]
     payment_status = Column(SQLEnum(PaymentStatus), nullable=False, default=PaymentStatus.PAID)  # type: ignore[var-annotated]
+    outlet_id = Column(Integer, nullable=True, index=True)
     due_date = Column(DateTime(timezone=True), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

@@ -50,3 +50,29 @@ export const useUIStore = create<UIStoreState>()(
     }
   )
 )
+
+// Outlet store
+interface Outlet {
+  id: number
+  name: string
+  is_active: boolean
+}
+
+interface OutletState {
+  current_outlet_id: number | null
+  outlets: Outlet[]
+  setCurrentOutlet: (id: number | null) => void
+  setOutlets: (outlets: Outlet[]) => void
+}
+
+export const useOutletStore = create<OutletState>()((set) => ({
+  current_outlet_id: null,
+  outlets: [],
+  setCurrentOutlet: (id) => {
+    set({ current_outlet_id: id })
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('leuit_current_outlet', id?.toString() ?? '')
+    }
+  },
+  setOutlets: (outlets) => set({ outlets }),
+}))
