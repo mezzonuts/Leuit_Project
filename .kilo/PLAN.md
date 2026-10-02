@@ -58,6 +58,7 @@
 | **22** | **Performance Tuning** ✅ | In-memory cache, valuation endpoint caching, lazy-loaded routes, bundle splitting, 12 tests, PR #23 merged |
 | **23** | **Accessibility Audit** ✅ | Focus trap, AccessibleModal, SkipNav, ARIA improvements, 17 tests, PR #24 merged |
 | **24** | **i18n Localization** ✅ | react-i18next + i18next, id-ID + en-US locales, LanguageSwitcher with localStorage, 41 tests, PR #25 merged |
+| **25** | **Plugin Architecture** ✅ | Plugin manifest/config/hook schemas, registry service, CRUD API + hook triggering, 11 tests, PR #26 merged |
 
 ---
 
