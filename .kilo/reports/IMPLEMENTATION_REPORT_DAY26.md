@@ -74,7 +74,7 @@ Berhasil membangun infrastructure load testing lengkap dengan k6 scenarios (6 st
 | Suite | Tests | Status |
 |---|---|---|
 | Backend pytest | 341 passed | ✅ |
-| Frontend Vitest | 269 passed, 8 skipped | ✅ |
+| Frontend Vitest | 257 passed, 8 skipped | ✅ |
 | k6 benchmarks | 9 groups | ✅ |
 | Ruff lint | 0 errors | ✅ |
 
