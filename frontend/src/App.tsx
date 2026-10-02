@@ -2,11 +2,12 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './main'
-import { useSecurityStore } from '@/stores'
+import { useSecurityStore, useUIStore } from '@/stores'
 import { authApi } from '@/services/api'
 import Layout from '@/components/layout/Layout'
 import { LazyDashboard, LazyInventory, LazyBOM, LazyPurchases, LazySync } from '@/utils/lazyLoad'
 import DatabaseUnlockModal from '@/components/auth/DatabaseUnlockModal'
+import i18n from './i18n'
 
 const Dashboard = LazyDashboard
 const Inventory = LazyInventory
@@ -45,6 +46,13 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const { language } = useUIStore()
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('leuit_locale') || language || 'id'
+    i18n.changeLanguage(savedLang)
+  }, [language])
+
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
