@@ -1,5 +1,6 @@
-import { Clock, DollarSign, CreditCard } from 'lucide-react'
+import { Clock, DollarSign, CreditCard, MessageCircle } from 'lucide-react'
 import { formatRupiah, formatDate } from '@/utils/formatters'
+import { createWhatsAppReminderLink } from '@/utils/whatsapp'
 import { cn } from '@/utils/formatters'
 
 interface AccountsPayableAlertProps {
@@ -65,6 +66,7 @@ export default function AccountsPayableAlert({ alerts }: AccountsPayableAlertPro
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hari Tersisa</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Transaksi</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -87,6 +89,19 @@ export default function AccountsPayableAlert({ alerts }: AccountsPayableAlertPro
                     <span className={cn('badge', alert.days_until_due <= 0 ? 'badge-danger' : alert.days_until_due <= 3 ? 'badge-warning' : 'badge-info')}>
                       {alert.days_until_due <= 0 ? 'TERLAMBAT' : alert.days_until_due <= 3 ? 'URGENT' : 'NORMAL'}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {alert.phone_whatsapp && (
+                      <a
+                        href={createWhatsAppReminderLink(alert.phone_whatsapp, alert.supplier_name, alert.total_unpaid, alert.days_until_due)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 btn-secondary text-sm"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        WhatsApp
+                      </a>
+                    )}
                   </td>
                 </tr>
               ))}
