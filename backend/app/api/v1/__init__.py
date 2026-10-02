@@ -8,6 +8,7 @@ from app.api.v1 import (
     inventory,
     outlets,
     pos_sync,
+    public_menu,
     purchases,
     reports,
 )
@@ -23,3 +24,4 @@ api_router.include_router(forecast.router, prefix="/forecast", tags=["Forecast &
 api_router.include_router(outlets.router)
 api_router.include_router(reports.router)
 api_router.include_router(analytics.router)
+api_router.include_router(public_menu.router)
