@@ -1,19 +1,18 @@
 from datetime import UTC, datetime, timedelta
 
 import httpx
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_db, verify_license
 from app.core.config import settings
-from app.models.ingredient import Ingredient
-from app.models.purchase import InventoryPurchase
-from app.models.transaction import IngredientDailyUsage
 from app.schemas.forecast_schema import (
-    RestockItemResponse,
+    Forecast30DayResponse,
+    ForecastItemResponse,
     RestockSheetResponse,
     WeatherForecastResponse,
 )
+from app.services.forecaster import forecast_30_day, forecast_restock_sheet
 
 router = APIRouter(prefix="/forecast", tags=["Forecast & Weather"])
 
@@ -69,91 +68,59 @@ async def get_weather_forecast(
 def get_restock_sheet(
     db: Session = Depends(get_db),
     license_info: dict = Depends(verify_license),
+    adm4: str | None = Query(None),
+    horizon_days: int = Query(7, ge=1, le=30),
 ):
     """
-    Generate restock recommendations for next 7 days.
-    Uses historical usage + weather + safety stock.
+    Generate restock recommendations for next N days (default 7, max 30).
+    Uses Prophet forecasting with weather adjustment.
     """
-    from datetime import datetime
+    try:
+        result = forecast_restock_sheet(
+            db=db,
+            adm4_code=adm4,
+            horizon_days=horizon_days,
+        )
+        return RestockSheetResponse(**result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate restock sheet: {str(e)}")
 
-    ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
-    items = []
-    total_cost = 0.0
-    high_priority = 0
-
-    for ing in ingredients:
-        # Calculate average daily usage from last 30 days
-        end_date = datetime.now(UTC)
-        start_date = end_date - timedelta(days=30)
-
-        usage_records = db.query(IngredientDailyUsage).filter(
-            IngredientDailyUsage.ingredient_id == ing.id,
-            IngredientDailyUsage.usage_date >= start_date,
-            IngredientDailyUsage.usage_date <= end_date,
-        ).all()
-
-        avg_daily_usage = 0.0
-        if usage_records:
-            total_used = sum(float(r.total_quantity_used) for r in usage_records)
-            avg_daily_usage = total_used / len(usage_records)
-
-        # Predict 7-day consumption
-        predicted_7d = avg_daily_usage * 7
-
-        # Safety stock calculation
-        safety_stock = float(ing.min_stock_threshold) * settings.SAFETY_STOCK_MULTIPLIER
-
-        # Lead time demand
-        lead_time_demand = avg_daily_usage * ing.lead_time_days
-
-        # Recommended order quantity
-        current_stock = float(ing.current_stock)
-        total_needed = predicted_7d + safety_stock + lead_time_demand
-        recommended_qty = max(0.0, total_needed - current_stock)
-
-        # Priority
-        stock_ratio = (current_stock / float(ing.min_stock_threshold) * 100) if ing.min_stock_threshold > 0 else 100
-
-        if stock_ratio < 100:
-            priority = "high"
-        elif stock_ratio < 150:
-            priority = "medium"
-        else:
-            priority = "low"
-
-        if priority == "high":
-            high_priority += 1
-
-        # Find default supplier
-        default_purchase = db.query(InventoryPurchase).filter(
-            InventoryPurchase.ingredient_id == ing.id
-        ).order_by(InventoryPurchase.purchase_date.desc()).first()
-
-        supplier_id = default_purchase.supplier_id if default_purchase else None
-        supplier_name = default_purchase.supplier.name if default_purchase and default_purchase.supplier else None
-
-        estimated_cost = recommended_qty * float(ing.cost_per_unit)
-        total_cost += estimated_cost
-
-        items.append(RestockItemResponse(
-            ingredient_id=ing.id,
-            ingredient_name=ing.name,
-            unit=ing.unit,
-            current_stock=current_stock,
-            predicted_consumption_7d=round(predicted_7d, 2),
-            recommended_order_qty=round(recommended_qty, 2),
-            safety_stock=round(safety_stock, 2),
-            estimated_cost=round(estimated_cost, 2),
-            priority=priority,
-            supplier_id=supplier_id,
-            supplier_name=supplier_name,
-            lead_time_days=ing.lead_time_days,
-        ))
-
-    return RestockSheetResponse(
-        items=items,
-        total_estimated_cost=round(total_cost, 2),
-        high_priority_count=high_priority,
-        generated_at=datetime.now(UTC),
-    )
+@router.get("/30-day", response_model=Forecast30DayResponse)
+def get_30_day_forecast(
+    ingredient_id: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+    license_info: dict = Depends(verify_license),
+    adm4: str | None = Query(None),
+):
+    """
+    Get 30-day demand forecast for a specific ingredient.
+    Uses Prophet forecasting with weather adjustment and Indonesian holidays.
+    """
+    try:
+        result = forecast_30_day(
+            db=db,
+            ingredient_id=ingredient_id,
+            adm4_code=adm4,
+        )
+        
+        # Convert predictions to schema
+        predictions = [
+            ForecastItemResponse(
+                date=p["date"],
+                yhat=p["yhat"],
+                yhat_lower=p["yhat_lower"],
+                yhat_upper=p["yhat_upper"],
+                weather_adjusted=p.get("weather_adjusted", False),
+            )
+            for p in result.get("predictions", [])
+        ]
+        
+        return Forecast30DayResponse(
+            ingredient_id=ingredient_id,
+            predictions=predictions,
+            model_info=result.get("model_info", {}),
+            weather_adjusted=result.get("weather_adjusted", False),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate forecast: {str(e)}")
