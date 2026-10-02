@@ -1,5 +1,6 @@
 import os
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,7 @@ sys.path.insert(0, _backend_dir)
 
 
 @pytest.fixture(autouse=True)
-def _clear_cache_between_tests():
+def _clear_cache_between_tests() -> Iterator[None]:
     from app.core.cache import invalidate_cache
 
     invalidate_cache()

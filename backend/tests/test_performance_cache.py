@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator
 
 import pytest
 
@@ -14,7 +15,7 @@ from app.core.cache import (
 
 
 @pytest.fixture(autouse=True)
-def _clear_cache():
+def _clear_cache() -> Iterator[None]:
     invalidate_cache()
     yield
     invalidate_cache()
