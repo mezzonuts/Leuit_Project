@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    analytics,
     auth_security,
     bom,
     forecast,
@@ -21,3 +22,4 @@ api_router.include_router(purchases.router, prefix="/purchases", tags=["Purchase
 api_router.include_router(forecast.router, prefix="/forecast", tags=["Forecast & Weather"])
 api_router.include_router(outlets.router)
 api_router.include_router(reports.router)
+api_router.include_router(analytics.router)
