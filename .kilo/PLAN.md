@@ -55,6 +55,7 @@
 | **19** | **Supplier Integration** ✅ | Supplier stats endpoint, SupplierDrawer, WhatsApp reminders, 6 tests, PR #20 merged |
 | **20** | **Customer Facing** ✅ | Public menu endpoint, QR code generator, MenuQRPage, ReceiptView, PublicMenuPage, 17 tests, PR #21 merged |
 | **21** | **Audit Trail** ✅ | AuditLog model with SHA256 hash chaining, verify/export endpoints, 11 tests, PR #22 merged |
+| **22** | **Performance Tuning** ✅ | In-memory cache, valuation endpoint caching, lazy-loaded routes, bundle splitting, 12 tests, PR #23 merged |
 
 ---
 
