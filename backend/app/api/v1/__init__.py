@@ -8,6 +8,7 @@ from app.api.v1 import (
     forecast,
     inventory,
     outlets,
+    plugins,
     pos_sync,
     public_menu,
     purchases,
@@ -27,3 +28,4 @@ api_router.include_router(reports.router)
 api_router.include_router(audit.router)
 api_router.include_router(analytics.router)
 api_router.include_router(public_menu.router)
+api_router.include_router(plugins.router)
