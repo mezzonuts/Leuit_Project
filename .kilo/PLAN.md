@@ -57,6 +57,7 @@
 | **21** | **Audit Trail** ✅ | AuditLog model with SHA256 hash chaining, verify/export endpoints, 11 tests, PR #22 merged |
 | **22** | **Performance Tuning** ✅ | In-memory cache, valuation endpoint caching, lazy-loaded routes, bundle splitting, 12 tests, PR #23 merged |
 | **23** | **Accessibility Audit** ✅ | Focus trap, AccessibleModal, SkipNav, ARIA improvements, 17 tests, PR #24 merged |
+| **24** | **i18n Localization** ✅ | react-i18next + i18next, id-ID + en-US locales, LanguageSwitcher with localStorage, 41 tests, PR #25 merged |
 
 ---
 
