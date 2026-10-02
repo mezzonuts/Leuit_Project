@@ -35,6 +35,7 @@ export default defineConfig({
           forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
           charts: ['recharts'],
           scanner: ['html5-qrcode'],
+          icons: ['lucide-react'],
         },
       },
     },

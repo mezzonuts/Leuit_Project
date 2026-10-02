@@ -5,12 +5,14 @@ import { queryClient } from './main'
 import { useSecurityStore } from '@/stores'
 import { authApi } from '@/services/api'
 import Layout from '@/components/layout/Layout'
-import Dashboard from '@/components/dashboard/Dashboard'
-import Inventory from '@/components/inventory/Inventory'
-import BOM from '@/components/bom/BOM'
-import Purchases from '@/components/purchases/Purchases'
-import Sync from '@/components/sync/Sync'
+import { LazyDashboard, LazyInventory, LazyBOM, LazyPurchases, LazySync } from '@/utils/lazyLoad'
 import DatabaseUnlockModal from '@/components/auth/DatabaseUnlockModal'
+
+const Dashboard = LazyDashboard
+const Inventory = LazyInventory
+const BOM = LazyBOM
+const Purchases = LazyPurchases
+const Sync = LazySync
 import LicenseGraceBanner from '@/components/layout/LicenseGraceBanner'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {

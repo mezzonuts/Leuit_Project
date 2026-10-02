@@ -7,6 +7,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_db, verify_license
+from app.core.cache import get_cache, invalidate_cache, set_cache
 from app.models.ingredient import Ingredient
 from app.models.transaction import IngredientDailyUsage
 from app.schemas.ingredient_schema import (
@@ -75,6 +76,8 @@ def create_ingredient(
     db.add(ingredient)
     db.commit()
     db.refresh(ingredient)
+    invalidate_cache("valuation")
+    invalidate_cache("inventory")
     return IngredientResponse.model_validate(ingredient)
 
 @router.get("/valuation/summary", response_model=ValuationSummary)
@@ -83,6 +86,11 @@ def get_valuation_summary(
     license_info: dict = Depends(verify_license),
 ):
     """Get warehouse valuation summary."""
+    cache_key = "valuation_summary"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return ValuationSummary(**cached)
+
     ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
     total_valuation = sum(
@@ -97,12 +105,15 @@ def get_valuation_summary(
         if ing.shelf_life_days <= 3
     )
 
-    return ValuationSummary(
+    summary = ValuationSummary(
         total_valuation=round(total_valuation, 2),
         total_ingredients=len(ingredients),
         low_stock_count=low_stock_count,
         expired_soon_count=expired_soon_count,
     )
+
+    set_cache(cache_key, summary.model_dump(), ttl=300)
+    return summary
 
 @router.get("/valuation/items", response_model=list[ValuationItem])
 def get_valuation_items(
@@ -110,9 +121,14 @@ def get_valuation_items(
     license_info: dict = Depends(verify_license),
 ):
     """Get detailed valuation per ingredient."""
+    cache_key = "valuation_items"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return [ValuationItem(**item) for item in cached]
+
     ingredients = db.query(Ingredient).filter(Ingredient.is_active).all()
 
-    return [
+    items = [
         ValuationItem(
             id=ing.id,
             name=ing.name,
@@ -126,6 +142,9 @@ def get_valuation_items(
         )
         for ing in ingredients
     ]
+
+    set_cache(cache_key, [item.model_dump() for item in items], ttl=300)
+    return items
 
 @router.get("/valuation/export-csv")
 def export_valuation_csv(
@@ -268,6 +287,8 @@ def update_ingredient(
 
     db.commit()
     db.refresh(ingredient)
+    invalidate_cache("valuation")
+    invalidate_cache("inventory")
     return IngredientResponse.model_validate(ingredient)
 
 @router.delete("/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -283,6 +304,8 @@ def delete_ingredient(
 
     ingredient.is_active = False
     db.commit()
+    invalidate_cache("valuation")
+    invalidate_cache("inventory")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.post("/{ingredient_id}/stock-opname", response_model=StockOpnameResponse)
