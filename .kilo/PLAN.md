@@ -50,6 +50,7 @@
 | **14** | **QA, Code Review, Bug Fix, Report** ✅ | Full test run (235 backend + 226 frontend), lint/typecheck clean, security audit clean, performance benchmarks met, `RELEASE_REPORT.md` generated, Sprint 1 complete |
 | **15** | **Advanced Forecasting** ✅ | Prophet integration, seasonality, Indonesian holidays, weather-adjusted predictions, 30-day forecast endpoint, 41 tests, PR #16 merged |
 | **16** | **Multi-outlet Support** ✅ | Outlet model, per-outlet inventory, consolidated reports, OutletSwitcher UI, 13 tests, PR #17 merged |
+| **17** | **Mobile Companion (PWA)** ✅ | manifest, service worker, offline sync hook, 4 tests, PR #18 merged |
 
 ---
 
