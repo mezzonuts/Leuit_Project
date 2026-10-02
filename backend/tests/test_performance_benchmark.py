@@ -1,8 +1,10 @@
 """Performance benchmarks using pytest-benchmark."""
 
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 from app.core.security.key_envelope import KeyEnvelope, derive_sqlcipher_key
 from app.services.forecaster import (
@@ -17,7 +19,7 @@ from app.services.forecaster import (
 
 class TestForecasterBenchmarks:
     @pytest.mark.benchmark(group="forecaster")
-    def test_calculate_avg_daily_usage(self, benchmark):
+    def test_calculate_avg_daily_usage(self, benchmark: BenchmarkFixture) -> None:
         db = MagicMock()
         records = [MagicMock(total_quantity_used=100.0) for _ in range(100)]
         db.query.return_value.filter.return_value.all.return_value = records
@@ -26,29 +28,29 @@ class TestForecasterBenchmarks:
         assert result == 100.0
 
     @pytest.mark.benchmark(group="forecaster")
-    def test_predict_consumption(self, benchmark):
+    def test_predict_consumption(self, benchmark: BenchmarkFixture) -> None:
         result = benchmark(predict_consumption, 100.0, 30)
         assert result == 3000.0
 
     @pytest.mark.benchmark(group="forecaster")
-    def test_calculate_safety_stock(self, benchmark):
+    def test_calculate_safety_stock(self, benchmark: BenchmarkFixture) -> None:
         result = benchmark(calculate_safety_stock, 100.0)
         assert result == 120.0
 
     @pytest.mark.benchmark(group="forecaster")
-    def test_calculate_recommended_order_qty(self, benchmark):
+    def test_calculate_recommended_order_qty(self, benchmark: BenchmarkFixture) -> None:
         result = benchmark(calculate_recommended_order_qty, 50.0, 700.0, 120.0, 140.0)
         assert result == 910.0
 
     @pytest.mark.benchmark(group="forecaster")
-    def test_calculate_priority(self, benchmark):
+    def test_calculate_priority(self, benchmark: BenchmarkFixture) -> None:
         result = benchmark(calculate_priority, 50.0, 100.0)
         assert result == "high"
 
 
 class TestWeatherBenchmarks:
     @pytest.mark.benchmark(group="weather")
-    def test_apply_weather_adjustment(self, benchmark):
+    def test_apply_weather_adjustment(self, benchmark: BenchmarkFixture) -> None:
         result = benchmark(
             _apply_weather_adjustment, 100.0, {"rainfall_prob": 100, "temperature_avg": 27, "humidity": 75}
         )
@@ -57,12 +59,12 @@ class TestWeatherBenchmarks:
 
 class TestSecurityBenchmarks:
     @pytest.mark.benchmark(group="security")
-    def test_key_envelope_generate(self, benchmark):
+    def test_key_envelope_generate(self, benchmark: BenchmarkFixture) -> None:
         result = benchmark(KeyEnvelope.generate_dek)
         assert len(result) == 32
 
     @pytest.mark.benchmark(group="security")
-    def test_derive_sqlcipher_key(self, benchmark):
+    def test_derive_sqlcipher_key(self, benchmark: BenchmarkFixture) -> None:
         dek = b'\x00' * 32
         result = benchmark(derive_sqlcipher_key, dek)
         assert len(result) == 64
@@ -70,12 +72,12 @@ class TestSecurityBenchmarks:
 
 class TestDatabaseBenchmarks:
     @pytest.mark.benchmark(group="database")
-    def test_ingredient_creation(self, benchmark):
+    def test_ingredient_creation(self, benchmark: BenchmarkFixture) -> None:
         from app.models.ingredient import Ingredient
 
         mock_db = MagicMock()
 
-        def create_ingredient():
+        def create_ingredient() -> Any:
             ing = Ingredient(
                 name="Test",
                 unit="gram",
