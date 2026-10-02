@@ -48,6 +48,7 @@
 | **12** | **Backend: Forecasting & Weather** ✅ | weather_client.py, forecaster.py, 23 tests (forecasting + weather), PR #13 merged |
 | **13** | **Integration & Hardening** ✅ | PyArmor, PyInstaller, main.py launcher verified, 36 hardening tests, PR #14 merged |
 | **14** | **QA, Code Review, Bug Fix, Report** ✅ | Full test run (235 backend + 226 frontend), lint/typecheck clean, security audit clean, performance benchmarks met, `RELEASE_REPORT.md` generated, Sprint 1 complete |
+| **15** | **Advanced Forecasting** ✅ | Prophet integration, seasonality, Indonesian holidays, weather-adjusted predictions, 30-day forecast endpoint, 41 tests, PR #16 merged |
 
 ---
 
