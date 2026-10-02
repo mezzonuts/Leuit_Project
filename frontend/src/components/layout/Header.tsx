@@ -11,7 +11,7 @@ export default function Header({ onMenuClick, title }: HeaderProps) {
   const { licenseGraceDays } = useUIStore()
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200">
+    <header role="banner" className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200">
       <div className="flex h-full items-center justify-between px-4 lg:px-6">
         <div className="flex items-center gap-4">
           <button
@@ -21,7 +21,7 @@ export default function Header({ onMenuClick, title }: HeaderProps) {
           >
             <Menu className="h-6 w-6" />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+          <h1 className="text-lg font-semibold text-gray-900" aria-label={title}>{title}</h1>
         </div>
 
         <div className="flex items-center gap-4">

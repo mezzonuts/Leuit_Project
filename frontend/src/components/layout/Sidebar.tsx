@@ -42,7 +42,7 @@ export default function Sidebar({ isOpen, onToggle, mobileOpen, onMobileClose }:
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3 overflow-y-auto" aria-label="Menu navigasi">
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto" role="navigation" aria-label="Menu navigasi">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/')
             return (
