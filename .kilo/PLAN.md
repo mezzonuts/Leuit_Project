@@ -59,6 +59,7 @@
 | **23** | **Accessibility Audit** ✅ | Focus trap, AccessibleModal, SkipNav, ARIA improvements, 17 tests, PR #24 merged |
 | **24** | **i18n Localization** ✅ | react-i18next + i18next, id-ID + en-US locales, LanguageSwitcher with localStorage, 41 tests, PR #25 merged |
 | **25** | **Plugin Architecture** ✅ | Plugin manifest/config/hook schemas, registry service, CRUD API + hook triggering, 11 tests, PR #26 merged |
+| **26** | **Load Testing** ✅ | k6 scenarios (50-2000 VUs), pytest-benchmark (9 groups), load-test.yml CI, PR #27 merged |
 
 ---
 
