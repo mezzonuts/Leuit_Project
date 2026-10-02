@@ -26,10 +26,12 @@ export const useSecurityStore = create<SecurityStore>()(
 )
 
 interface UIStoreState extends UIState {
+  language: string
   openDrawer: (type: DrawerType, data?: Record<string, any> | null) => void
   closeDrawer: () => void
   toggleMobileMenu: () => void
   setLicenseGraceDays: (days: number | null) => void
+  setLanguage: (lng: string) => void
 }
 
 export const useUIStore = create<UIStoreState>()(
@@ -39,14 +41,16 @@ export const useUIStore = create<UIStoreState>()(
       drawerData: null as Record<string, any> | null,
       isMobileMenuOpen: false,
       licenseGraceDays: null,
+      language: 'id',
       openDrawer: (type, data = null) => set({ activeDrawer: type, drawerData: data }),
       closeDrawer: () => set({ activeDrawer: null, drawerData: null }),
       toggleMobileMenu: () => set((state) => ({ isMobileMenuOpen: !state.isMobileMenuOpen })),
       setLicenseGraceDays: (days) => set({ licenseGraceDays: days }),
+      setLanguage: (lng) => set({ language: lng }),
     }),
     {
       name: 'leuit-ui',
-      partialize: (state) => ({ licenseGraceDays: state.licenseGraceDays }),
+      partialize: (state) => ({ licenseGraceDays: state.licenseGraceDays, language: state.language }),
     }
   )
 )
