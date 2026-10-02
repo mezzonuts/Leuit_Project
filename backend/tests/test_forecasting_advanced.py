@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -254,7 +255,7 @@ class TestSeasonalityDetection:
 class TestWeatherIntegration:
     def test_get_weather_data_success(self) -> None:
         # Mock the async function in weather_client
-        async def mock_get_weather(adm4_code=None):
+        async def mock_get_weather(adm4_code: str | None = None) -> list[dict[str, Any]]:
             return [
                 MagicMock(
                     temperature_min=22.0,
@@ -283,7 +284,7 @@ class TestWeatherIntegration:
 # ── Test Model Persistence ──
 
 class TestModelPersistence:
-    def test_save_and_load_model(self, tmp_path) -> None:
+    def test_save_and_load_model(self, tmp_path: Path) -> None:
         model = Prophet()
         model.fit(pd.DataFrame({
             "ds": pd.date_range("2024-01-01", periods=100),
