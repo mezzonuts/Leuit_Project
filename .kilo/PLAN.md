@@ -52,6 +52,7 @@
 | **16** | **Multi-outlet Support** ✅ | Outlet model, per-outlet inventory, consolidated reports, OutletSwitcher UI, 13 tests, PR #17 merged |
 | **17** | **Mobile Companion (PWA)** ✅ | manifest, service worker, offline sync hook, 4 tests, PR #18 merged |
 | **18** | **Advanced Analytics** ✅ | drill-down reports, export scheduling, DateRangePicker, DrillDownChart, 21 tests, PR #19 merged |
+| **19** | **Supplier Integration** ✅ | Supplier stats endpoint, SupplierDrawer, WhatsApp reminders, 6 tests, PR #20 merged |
 
 ---
 
