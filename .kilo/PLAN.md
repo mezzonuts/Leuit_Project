@@ -53,6 +53,7 @@
 | **17** | **Mobile Companion (PWA)** ✅ | manifest, service worker, offline sync hook, 4 tests, PR #18 merged |
 | **18** | **Advanced Analytics** ✅ | drill-down reports, export scheduling, DateRangePicker, DrillDownChart, 21 tests, PR #19 merged |
 | **19** | **Supplier Integration** ✅ | Supplier stats endpoint, SupplierDrawer, WhatsApp reminders, 6 tests, PR #20 merged |
+| **20** | **Customer Facing** ✅ | Public menu endpoint, QR code generator, MenuQRPage, ReceiptView, PublicMenuPage, 17 tests, PR #21 merged |
 
 ---
 
