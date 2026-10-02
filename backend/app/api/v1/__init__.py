@@ -5,8 +5,10 @@ from app.api.v1 import (
     bom,
     forecast,
     inventory,
+    outlets,
     pos_sync,
     purchases,
+    reports,
 )
 
 api_router = APIRouter()
@@ -17,3 +19,5 @@ api_router.include_router(pos_sync.router, prefix="/sync", tags=["POS Sync"])
 api_router.include_router(bom.router, prefix="/bom", tags=["BOM & Recipe"])
 api_router.include_router(purchases.router, prefix="/purchases", tags=["Purchases"])
 api_router.include_router(forecast.router, prefix="/forecast", tags=["Forecast & Weather"])
+api_router.include_router(outlets.router)
+api_router.include_router(reports.router)

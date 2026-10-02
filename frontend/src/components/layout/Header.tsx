@@ -1,5 +1,6 @@
 import { Menu } from 'lucide-react'
 import { useUIStore } from '@/stores'
+import OutletSwitcher from './OutletSwitcher'
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -24,6 +25,7 @@ export default function Header({ onMenuClick, title }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
+          <OutletSwitcher />
           {licenseGraceDays !== null && licenseGraceDays > 0 && licenseGraceDays <= 3 && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-warning-50 text-warning-700 text-sm font-medium">
               <span className="relative flex h-2 w-2">

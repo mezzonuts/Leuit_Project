@@ -1,6 +1,7 @@
 # Models package exports
 from app.models.ingredient import Ingredient
 from app.models.menu import MenuItem, RecipeItem
+from app.models.outlet import Outlet
 from app.models.purchase import InventoryPurchase, OperationalAuditLog, PaymentMethod, PaymentStatus
 from app.models.security import AppLicense, SecurityAuditClock, SecurityKeyring, SecurityUnlockAudit
 from app.models.supplier import Supplier
@@ -8,6 +9,7 @@ from app.models.transaction import IngredientDailyUsage, PosSyncLog, SalesTransa
 
 __all__ = [
     "Ingredient",
+    "Outlet",
     "Supplier",
     "MenuItem",
     "RecipeItem",

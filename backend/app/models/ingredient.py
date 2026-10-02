@@ -18,6 +18,7 @@ class Ingredient(Base):
     min_stock_threshold = Column(Numeric(15, 3), default=0, nullable=False)
     lead_time_days = Column(Integer, default=1, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False, index=True)
+    outlet_id = Column(Integer, nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
