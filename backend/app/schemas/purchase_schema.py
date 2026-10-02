@@ -78,6 +78,7 @@ class PurchaseListResponse(BaseModel):
 class AccountsPayableAlert(BaseModel):
     supplier_id: int
     supplier_name: str
+    phone_whatsapp: str | None = None
     total_unpaid: float
     nearest_due_date: datetime
     days_until_due: int
@@ -87,3 +88,12 @@ class AccountsPayableResponse(BaseModel):
     alerts: list[AccountsPayableAlert]
     total_unpaid: float
     urgent_count: int
+
+class SupplierStatsResponse(BaseModel):
+    supplier_id: int
+    supplier_name: str
+    total_purchases: float
+    unpaid_total: float
+    avg_order_value: float
+    purchase_count: int
+    period_days: int

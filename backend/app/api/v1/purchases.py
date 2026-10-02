@@ -16,6 +16,7 @@ from app.schemas.purchase_schema import (
     PurchaseResponse,
     SupplierCreate,
     SupplierResponse,
+    SupplierStatsResponse,
     SupplierUpdate,
 )
 
@@ -85,6 +86,44 @@ def delete_supplier(
     db.delete(supplier)
     db.commit()
     return
+
+@router.get("/suppliers/{supplier_id}/stats", response_model=SupplierStatsResponse)
+def get_supplier_stats(
+    supplier_id: int,
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    license_info: dict = Depends(verify_license),
+) -> SupplierStatsResponse:
+    """Get supplier statistics: total purchases, unpaid, avg order."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.models.purchase import InventoryPurchase, PaymentStatus
+
+    supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+
+    end_date = datetime.now(UTC)
+    start_date = end_date - timedelta(days=days)
+
+    purchases = db.query(InventoryPurchase).filter(
+        InventoryPurchase.supplier_id == supplier_id,
+        InventoryPurchase.purchase_date >= start_date,
+    ).all()
+
+    total_purchases = sum(float(p.total_cost) for p in purchases)
+    unpaid_total = sum(float(p.total_cost) for p in purchases if p.payment_status == PaymentStatus.UNPAID)
+    avg_order = total_purchases / len(purchases) if purchases else 0.0
+
+    return SupplierStatsResponse(
+        supplier_id=supplier.id,
+        supplier_name=supplier.name,
+        total_purchases=round(total_purchases, 2),
+        unpaid_total=round(unpaid_total, 2),
+        avg_order_value=round(avg_order, 2),
+        purchase_count=len(purchases),
+        period_days=days,
+    )
 
 # Purchase endpoints
 @router.get("", response_model=PurchaseListResponse)
@@ -230,6 +269,7 @@ def get_payables(
         alerts.append(AccountsPayableAlert(
             supplier_id=supplier_id,
             supplier_name=data["supplier"].name,
+            phone_whatsapp=data["supplier"].phone_whatsapp,
             total_unpaid=data["total_unpaid"],
             nearest_due_date=data["nearest_due_date"] or datetime.now(UTC),
             days_until_due=days_until,
