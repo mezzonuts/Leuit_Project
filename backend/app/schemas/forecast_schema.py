@@ -53,3 +53,19 @@ class RecipeScalerResponse(BaseModel):
     items: list[RecipeScalerItemResponse]
     all_sufficient: bool
     total_estimated_cost: float
+
+
+# 30-Day Forecast
+class ForecastItemResponse(BaseModel):
+    date: str
+    yhat: float
+    yhat_lower: float
+    yhat_upper: float
+    weather_adjusted: bool
+
+
+class Forecast30DayResponse(BaseModel):
+    ingredient_id: int
+    predictions: list[ForecastItemResponse]
+    model_info: dict
+    weather_adjusted: bool
