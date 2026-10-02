@@ -1,0 +1,57 @@
+name: Load Test
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly on Sunday
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          uv sync --dev
+
+      - name: Start backend
+        run: |
+          cd backend
+          uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+
+      - name: Initialize database
+        run: |
+          cd backend
+          curl -X POST http://localhost:8000/api/v1/auth/initialize \
+            -H "Content-Type: application/json" \
+            -d '{"owner_passkey": "test-passkey-123", "license_id": "DEV-LOCAL-001"}'
+
+      - name: Unlock database
+        run: |
+          cd backend
+          curl -X POST http://localhost:8000/api/v1/auth/unlock \
+            -H "Content-Type: application/json" \
+            -d '{"passkey": "test-passkey-123", "is_developer": false}'
+
+      - name: Run k6 load test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: load-test/k6-scenarios.js
+        env:
+          BASE_URL: http://localhost:8000
+          PASSKEY: test-passkey-123
+
+      - name: Run pytest-benchmark
+        run: |
+          cd backend
+          uv run pytest tests/test_performance_benchmark.py --benchmark-only -v
