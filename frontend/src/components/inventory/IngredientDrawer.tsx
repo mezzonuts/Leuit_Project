@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { X, Save, Loader2, Camera } from 'lucide-react'
 import { useUIStore } from '@/stores'
 import { api } from '@/services/api'
@@ -16,6 +17,7 @@ const ingredientSchema = z.object({
   current_stock: z.number().min(0, 'Stok tidak boleh negatif'),
   min_stock_threshold: z.number().min(0, 'Threshold tidak boleh negatif'),
   lead_time_days: z.number().min(0, 'Lead time tidak boleh negatif').default(1),
+  category_id: z.number().nullable().optional(),
 })
 
 type IngredientFormSchema = z.infer<typeof ingredientSchema>
@@ -46,7 +48,13 @@ export default function IngredientDrawer({ onClose }: IngredientDrawerProps) {
       current_stock: 0,
       min_stock_threshold: 0,
       lead_time_days: 1,
+      category_id: null,
     },
+  })
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories-for-form'],
+    queryFn: () => api.get('/categories').then(res => res.data),
   })
 
   useEffect(() => {
@@ -60,6 +68,7 @@ export default function IngredientDrawer({ onClose }: IngredientDrawerProps) {
         current_stock: isOpname ? 0 : ingredient.current_stock,
         min_stock_threshold: ingredient.min_stock_threshold,
         lead_time_days: ingredient.lead_time_days || 1,
+        category_id: ingredient.category_id ?? null,
       })
     } else {
       reset()
@@ -123,6 +132,19 @@ export default function IngredientDrawer({ onClose }: IngredientDrawerProps) {
                 <Camera className="h-4 w-4" />
               </button>
             </div>
+          </div>
+
+          <div>
+            <label className="label">Kategori</label>
+            <select
+              {...register('category_id', { setValueAs: v => (v === '' ? null : Number(v)) })}
+              className="input"
+            >
+              <option value="">Tanpa Kategori</option>
+              {categories?.items?.map((cat: any) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
 
           <div>

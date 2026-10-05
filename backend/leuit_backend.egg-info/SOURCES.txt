@@ -8,6 +8,7 @@ app/api/v1/analytics.py
 app/api/v1/audit.py
 app/api/v1/auth_security.py
 app/api/v1/bom.py
+app/api/v1/categories.py
 app/api/v1/deps.py
 app/api/v1/forecast.py
 app/api/v1/inventory.py
@@ -27,6 +28,7 @@ app/core/security/key_envelope.py
 app/core/security/licensing.py
 app/models/__init__.py
 app/models/audit_log.py
+app/models/category.py
 app/models/ingredient.py
 app/models/menu.py
 app/models/outlet.py
@@ -37,6 +39,7 @@ app/models/transaction.py
 app/schemas/__init__.py
 app/schemas/auth_schema.py
 app/schemas/bom_schema.py
+app/schemas/category_schema.py
 app/schemas/forecast_schema.py
 app/schemas/ingredient_schema.py
 app/schemas/outlet_schema.py

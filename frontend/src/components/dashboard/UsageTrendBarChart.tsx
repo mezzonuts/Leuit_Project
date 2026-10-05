@@ -1,43 +1,45 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { api } from '@/services/api'
-import { formatDate } from '@/utils/formatters'
+import { Layers } from 'lucide-react'
+import CategoryManager from '@/components/inventory/CategoryManager'
 
-interface UsageDataPoint {
-  date: string
-  ingredient_id: number
-  ingredient_name: string
-  total_quantity_used: number
+interface CategoryUsage {
+  category_name: string
+  category_color: string
+  total_used: number
+  ingredient_count: number
 }
 
 export default function UsageTrendBarChart() {
-  const [selectedIngredientId, setSelectedIngredientId] = useState<number | null>(null)
-
-  const { data: ingredients } = useQuery({
-    queryKey: ['ingredients-for-chart'],
-    queryFn: () => api.get('/inventory', { params: { active_only: true } }).then(res => res.data),
-  })
+  const [groupBy, setGroupBy] = useState<'category' | 'daily'>('category')
+  const [showCategoryManager, setShowCategoryManager] = useState(false)
 
   const { data: usageData, isLoading } = useQuery({
-    queryKey: ['usage-trend', selectedIngredientId],
+    queryKey: ['usage-trend-chart', groupBy],
     queryFn: () =>
-      api.get('/dashboard/usage-trend', {
-        params: { ingredient_id: selectedIngredientId, days: 30 },
+      api.get('/inventory/usage-trend', {
+        params: { days: 30, group_by: groupBy },
       }).then(res => res.data),
-    enabled: !!ingredients?.items?.length,
   })
 
-  const ingredientOptions = ingredients?.items || []
+  const chartData = Array.isArray(usageData)
+    ? groupBy === 'category'
+      ? usageData.map((item: CategoryUsage) => ({
+          name: item.category_name,
+          value: item.total_used,
+          fill: item.category_color,
+          count: item.ingredient_count,
+        }))
+      : usageData.map((item: any) => ({
+          name: item.date?.substring(5, 10) || item.date,
+          value: item.total_quantity_used,
+          fill: '#16a34a',
+        }))
+    : []
 
   if (isLoading) {
     return (
@@ -49,42 +51,45 @@ export default function UsageTrendBarChart() {
     )
   }
 
-  const chartData = usageData?.map((item: UsageDataPoint) => ({
-    date: formatDate(item.date),
-    quantity: item.total_quantity_used,
-    name: item.ingredient_name,
-  })) || []
-
   return (
     <div className="card p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Tren Konsumsi 30 Hari</h2>
-        <select
-          value={selectedIngredientId || ''}
-          onChange={e => setSelectedIngredientId(e.target.value ? Number(e.target.value) : null)}
-          className="input w-auto max-w-xs"
-        >
-          <option value="">Semua Bahan</option>
-          {ingredientOptions.map((ing: any) => (
-            <option key={ing.id} value={ing.id}>
-              {ing.name}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={groupBy}
+            onChange={e => setGroupBy(e.target.value as 'category' | 'daily')}
+            className="form-input text-sm w-auto"
+            aria-label="Group by"
+          >
+            <option value="category">Per Kategori</option>
+            <option value="daily">Per Hari</option>
+          </select>
+          <button
+            onClick={() => setShowCategoryManager(true)}
+            className="btn-secondary flex items-center gap-1 text-sm"
+          >
+            <Layers className="h-4 w-4" />
+            Kategori
+          </button>
+        </div>
       </div>
 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis type="number" name="Kuantitas" tickFormatter={val => `${val}`} />
-            <YAxis type="category" dataKey="date" width={80} tick={{ fontSize: 12 }} />
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <YAxis />
             <Tooltip
-              formatter={(value: number) => [value.toLocaleString('id-ID'), 'Terpakai']}
-              labelFormatter={(label) => `Tanggal: ${label}`}
+              formatter={(value: number) => [value.toLocaleString('id-ID'), groupBy === 'category' ? 'Total Dipakai' : 'Kuantitas']}
             />
-            <Legend />
-            <Bar dataKey="quantity" name="Kuantitas" fill="#16a34a" radius={[0, 4, 4, 0]} />
+            {groupBy === 'category' && <Legend />}
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {groupBy === 'category' && chartData.map((entry, index) => (
+                <Bar key={index} dataKey="value" fill={entry.fill} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -93,6 +98,10 @@ export default function UsageTrendBarChart() {
         <div className="text-center py-12 text-gray-500">
           <p>Tidak ada data konsumsi untuk periode ini</p>
         </div>
+      )}
+
+      {showCategoryManager && (
+        <CategoryManager onClose={() => setShowCategoryManager(false)} />
       )}
     </div>
   )

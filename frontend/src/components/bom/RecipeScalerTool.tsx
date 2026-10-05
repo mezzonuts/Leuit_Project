@@ -36,7 +36,7 @@ export default function RecipeScalerTool({ ingredients: _ingredients }: RecipeSc
   const [result, setResult] = useState<any>(null)
 
   const scalerMutation = useMutation({
-    mutationFn: (data: ScalerFormSchema) => api.post('/bom/scaler', data),
+    mutationFn: (data: ScalerFormSchema) => api.post('/bom/scaler', data).then(res => res.data),
     onSuccess: (data) => {
       setResult(data)
     },
@@ -44,6 +44,10 @@ export default function RecipeScalerTool({ ingredients: _ingredients }: RecipeSc
 
   const selectedMenuId = watch('menu_item_id')
   const targetPortions = watch('target_portions')
+
+  // Unwrap axios response or nested { data: {...} } shape; guard items for .map/.filter
+  const scalerResult: any = result?.data && !Array.isArray(result?.items) ? result.data : result
+  const items = Array.isArray(scalerResult?.items) ? scalerResult.items : []
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault()
@@ -103,16 +107,16 @@ export default function RecipeScalerTool({ ingredients: _ingredients }: RecipeSc
       </div>
 
       {/* Results */}
-      {result && (
+      {scalerResult && items.length > 0 && (
         <div className="card overflow-hidden">
           <div className="p-4 border-b border-gray-200 bg-gray-50">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <h3 className="text-lg font-semibold text-gray-900">
-                Hasil Simulasi: {result.menu_name} × {result.target_portions} porsi
+                Hasil Simulasi: {scalerResult.menu_name} × {scalerResult.target_portions} porsi
               </h3>
-              <span className={`badge ${result.all_sufficient ? 'badge-success' : 'badge-danger'} flex items-center gap-1`}>
-                {result.all_sufficient ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
-                {result.all_sufficient ? 'Semua Bahan Cukup' : 'Ada Bahan Kurang'}
+              <span className={`badge ${scalerResult.all_sufficient ? 'badge-success' : 'badge-danger'} flex items-center gap-1`}>
+                {scalerResult.all_sufficient ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+                {scalerResult.all_sufficient ? 'Semua Bahan Cukup' : 'Ada Bahan Kurang'}
               </span>
             </div>
           </div>
@@ -130,7 +134,7 @@ export default function RecipeScalerTool({ ingredients: _ingredients }: RecipeSc
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {result.items.map((item: any) => (
+                {items.map((item: any) => (
                   <tr key={item.ingredient_name} className={!item.is_sufficient ? 'bg-danger-50/50' : ''}>
                     <td className="px-4 py-3 font-medium text-gray-900">{item.ingredient_name}</td>
                     <td className="px-4 py-3 text-right text-gray-600">{formatNumber(item.per_portion)} {item.unit}</td>
@@ -156,14 +160,14 @@ export default function RecipeScalerTool({ ingredients: _ingredients }: RecipeSc
             </table>
           </div>
 
-          {!result.all_sufficient && (
+          {!scalerResult.all_sufficient && items.length > 0 && (
             <div className="p-4 bg-danger-50 border-t border-danger-200">
               <h4 className="font-medium text-danger-800 mb-2 flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
                 Bahan yang harus dibeli tambahan:
               </h4>
               <ul className="space-y-1 text-sm text-danger-700">
-                {result.items.filter((i: any) => !i.is_sufficient).map((item: any) => (
+                {items.filter((i: any) => !i.is_sufficient).map((item: any) => (
                   <li key={item.ingredient_name} className="flex items-center gap-2">
                     <Package className="h-4 w-4" />
                     <span>{item.ingredient_name}: beli tambahan {formatNumber(item.deficit)} {item.unit}</span>

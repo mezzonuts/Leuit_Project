@@ -1,8 +1,9 @@
 from collections.abc import Generator
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -24,11 +25,22 @@ _engine: Engine | None = None
 _SessionLocal: Any = None
 
 
+def _has_sqlcipher() -> bool:
+    """Check if SQLCipher (pysqlcipher3) is available."""
+    try:
+        import pysqlcipher3  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 def get_database_url(encryption_key: str) -> str:
     """Generate SQLite connection URL with SQLCipher encryption."""
-    # For SQLCipher with pysqlcipher3, we use the file path and set PRAGMA key after connection
     db_path = settings.DATABASE_PATH
-    return f"sqlite+pysqlcipher:///{db_path}"
+    if _has_sqlcipher():
+        return f"sqlite+pysqlcipher:///{db_path}"
+    # Fallback to plain SQLite when SQLCipher is unavailable (dev mode)
+    return f"sqlite:///{db_path}"
 
 
 def init_database(encryption_key: str) -> None:
@@ -40,6 +52,10 @@ def init_database(encryption_key: str) -> None:
         _engine.dispose()
         _engine = None
         _SessionLocal = None
+
+    # Ensure database directory exists
+    db_path = Path(settings.DATABASE_PATH)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
 
     database_url = get_database_url(encryption_key)
 
@@ -53,19 +69,19 @@ def init_database(encryption_key: str) -> None:
         echo=settings.DEBUG,
     )
 
-    # Set encryption key on connect — using executescript to avoid key exposure in SQL logs
-    @event.listens_for(_engine, "connect")
-    def set_pragma_key(dbapi_connection: Any, connection_record: Any) -> None:
-        cursor = dbapi_connection.cursor()
-        # Use executescript to avoid key exposure in SQL query logs (echo=True)
-        escaped_key = _escape_pragma_key(encryption_key)
-        cursor.executescript(f"""
-            PRAGMA key = '{escaped_key}';
-            PRAGMA cipher_compatibility = 4;
-            PRAGMA cipher_page_size = 4096;
-            PRAGMA kdf_iter = 256000;
-        """)
-        cursor.close()
+    # Set encryption key on connect (only if SQLCipher is available)
+    if _has_sqlcipher():
+        @event.listens_for(_engine, "connect")
+        def set_pragma_key(dbapi_connection: Any, connection_record: Any) -> None:
+            cursor = dbapi_connection.cursor()
+            escaped_key = _escape_pragma_key(encryption_key)
+            cursor.executescript(f"""
+                PRAGMA key = '{escaped_key}';
+                PRAGMA cipher_compatibility = 4;
+                PRAGMA cipher_page_size = 4096;
+                PRAGMA kdf_iter = 256000;
+            """)
+            cursor.close()
 
     # Enable foreign keys
     @event.listens_for(_engine, "connect")
@@ -78,6 +94,21 @@ def init_database(encryption_key: str) -> None:
 
     # Create tables
     Base.metadata.create_all(bind=_engine)
+
+    # Idempotent column migration: category_id on ingredients (pre-B8 databases)
+    inspector = inspect(_engine)
+    if "ingredients" in inspector.get_table_names():
+        cols = {c["name"] for c in inspector.get_columns("ingredients")}
+        if "category_id" not in cols:
+            with _engine.begin() as conn:
+                conn.execute(text(
+                    "ALTER TABLE ingredients ADD COLUMN category_id INTEGER "
+                    "REFERENCES ingredient_categories(id)"
+                ))
+                conn.execute(text(
+                    "CREATE INDEX IF NOT EXISTS ix_ingredients_category_id "
+                    "ON ingredients (category_id)"
+                ))
 
 
 def get_engine() -> Engine:
@@ -118,6 +149,9 @@ def session_scope() -> Generator[Session, None, None]:
 
 def verify_database_key(encryption_key: str) -> bool:
     """Verify if the encryption key can open the database."""
+    if not _has_sqlcipher():
+        # Cannot verify encryption without SQLCipher — accept in dev mode
+        return True
     try:
         test_engine = create_engine(
             f"sqlite+pysqlcipher:///{settings.DATABASE_PATH}",

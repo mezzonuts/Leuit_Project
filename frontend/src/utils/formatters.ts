@@ -49,7 +49,7 @@ export function formatRelativeTime(dateString: string): string {
 
 export function getStockRatio(current: number, threshold: number): number {
   if (threshold <= 0) return 100
-  return Math.round((current / threshold) * 100)
+  return Math.min(Math.round((current / threshold) * 100), 100)
 }
 
 export function getStockStatus(ratio: number): 'safe' | 'warning' | 'danger' {

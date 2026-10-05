@@ -8,10 +8,11 @@ interface ValuationMetricCardProps {
   iconColor: string
   bgColor: string
   subtitle?: string
+  format?: 'currency' | 'count'
 }
 
 const ValuationMetricCard = forwardRef<HTMLDivElement, ValuationMetricCardProps>(
-  ({ title, value, icon, iconColor, bgColor, subtitle }, ref) => {
+  ({ title, value, icon, iconColor, bgColor, subtitle, format = 'currency' }, ref) => {
     return (
       <div
         ref={ref}
@@ -21,7 +22,7 @@ const ValuationMetricCard = forwardRef<HTMLDivElement, ValuationMetricCardProps>
           <div>
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className="mt-2 text-2xl font-bold text-gray-900">
-              {formatRupiah(value)}
+              {format === 'count' ? value.toLocaleString('id-ID') : formatRupiah(value)}
             </p>
             {subtitle && <p className="mt-1 text-xs text-gray-500">{subtitle}</p>}
           </div>

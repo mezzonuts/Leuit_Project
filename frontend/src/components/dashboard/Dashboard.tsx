@@ -10,7 +10,7 @@ import StockHealthTable from './StockHealthTable'
 export default function Dashboard() {
   const { data: valuation } = useQuery({
     queryKey: ['valuation'],
-    queryFn: () => api.get('/valuation').then(res => res.data),
+    queryFn: () => api.get('/inventory/valuation/summary').then(res => res.data),
   })
 
   const { data: stockHealth } = useQuery({
@@ -21,6 +21,11 @@ export default function Dashboard() {
   const { data: alerts } = useQuery({
     queryKey: ['critical-alerts'],
     queryFn: () => api.get('/inventory/alerts').then(res => res.data),
+  })
+
+  const { data: usageTrend } = useQuery({
+    queryKey: ['usage-trend-dashboard'],
+    queryFn: () => api.get('/inventory/usage-trend', { params: { days: 30 } }).then(res => res.data),
   })
 
   const handleExportValuation = () => {
@@ -64,6 +69,7 @@ export default function Dashboard() {
           iconColor="text-warning-600"
           bgColor="bg-warning-50"
           subtitle="Di bawah threshold minimum"
+          format="count"
         />
         <ValuationMetricCard
           title="Segera Kadaluwarsa"
@@ -72,13 +78,15 @@ export default function Dashboard() {
           iconColor="text-danger-600"
           bgColor="bg-danger-50"
           subtitle="< 3 hari sisa masa simpan"
+          format="count"
         />
         <ValuationMetricCard
           title="Trend 30 Hari"
-          value={stockHealth?.items?.length || 0}
+          value={Array.isArray(usageTrend) ? usageTrend.length : 0}
           icon={<TrendingUp />}
           iconColor="text-blue-600"
           bgColor="bg-blue-50"
+          format="count"
           subtitle="Bahan dengan data historis"
         />
       </div>

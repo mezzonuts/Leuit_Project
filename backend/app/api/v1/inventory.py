@@ -188,33 +188,58 @@ def get_usage_trend(
     license_info: dict = Depends(verify_license),
     ingredient_id: int | None = Query(None),
     days: int = Query(30, ge=1, le=365),
+    group_by: str = Query("daily", pattern="^(daily|category)$"),
 ):
-    """Get ingredient usage trend for charting."""
+    """Get ingredient usage trend. group_by=daily or category."""
     from datetime import datetime, timedelta
+
+    from sqlalchemy import text
 
     end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)
 
+    if group_by == "category":
+        result = db.execute(text("""
+            SELECT 
+                COALESCE(c.name, 'Tanpa Kategori') as category_name,
+                COALESCE(c.color, '#9ca3af') as category_color,
+                SUM(du.total_quantity_used) as total_used,
+                COUNT(DISTINCT du.ingredient_id) as ingredient_count
+            FROM ingredient_daily_usage du
+            JOIN ingredients i ON du.ingredient_id = i.id
+            LEFT JOIN ingredient_categories c ON i.category_id = c.id
+            WHERE du.usage_date >= :start_date
+            GROUP BY c.id, c.name, c.color
+            ORDER BY total_used DESC
+        """), {"start_date": start_date}).fetchall()
+
+        return [
+            {
+                "category_name": row[0],
+                "category_color": row[1],
+                "total_used": float(row[2]),
+                "ingredient_count": row[3],
+            }
+            for row in result
+        ]
+
+    # Default: daily grouping
     query = db.query(IngredientDailyUsage).filter(
         IngredientDailyUsage.usage_date >= start_date,
         IngredientDailyUsage.usage_date <= end_date,
     )
-
     if ingredient_id:
         query = query.filter(IngredientDailyUsage.ingredient_id == ingredient_id)
-
     usage = query.order_by(IngredientDailyUsage.usage_date).all()
-
-    result = []
-    for u in usage:
-        result.append({
+    return [
+        {
             "date": u.usage_date.isoformat(),
             "ingredient_id": u.ingredient_id,
             "ingredient_name": u.ingredient.name if u.ingredient else None,
             "total_quantity_used": float(u.total_quantity_used),
-        })
-
-    return result
+        }
+        for u in usage
+    ]
 
 @router.get("/alerts")
 def get_critical_alerts(

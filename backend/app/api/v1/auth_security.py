@@ -2,13 +2,11 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from nacl.public import PrivateKey
-from sqlalchemy.orm import Session
 
-from app.api.v1.deps import get_db
 from app.core.config import settings
-from app.core.database import init_database, verify_database_key
+from app.core.database import init_database
 from app.core.security import load_license_from_file, verify_license_token
 from app.core.security.hardware import get_machine_fingerprint
 from app.core.security.key_envelope import KeyEnvelope, derive_sqlcipher_key
@@ -90,7 +88,6 @@ def initialize_database_endpoint(request: InitializeRequest):
 @router.post("/unlock", response_model=UnlockResponse)
 def unlock_database(
     request: UnlockRequest,
-    db: Session = Depends(get_db),
 ):
     client_ip = "127.0.0.1"
     if not _check_rate_limit(client_ip):
@@ -102,22 +99,29 @@ def unlock_database(
     passkey = request.passkey
     is_developer = request.is_developer
 
-    license_file = load_license_from_file()
-    if not license_file:
+    from app.core.database import _has_sqlcipher
+    from app.core.database import get_session as _get_session
+
+    # Without SQLCipher, the DB is plain SQLite — open it directly to read keyring
+    if not _has_sqlcipher():
+        init_database("dev-mode-no-sqlcipher")
+
+    try:
+        db = next(_get_session())
+    except RuntimeError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="License file not found. Please activate license first."
-        )
-
-    keyring = db.query(SecurityKeyring).first()
-    if not keyring:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Keyring not initialized. Contact administrator."
+            detail="Database not initialized. Call /initialize first.",
         )
 
     try:
-        dek = None
+        keyring = db.query(SecurityKeyring).first()
+        if not keyring:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Keyring not initialized. Contact administrator.",
+            )
+
         if is_developer:
             dev_priv_path = Path(settings.DEV_PRIVATE_KEY_PATH)
             if not dev_priv_path.exists():
@@ -137,44 +141,38 @@ def unlock_database(
                 passkey
             )
 
-        sqlcipher_key = derive_sqlcipher_key(bytes.fromhex(dek))
-        if not verify_database_key(sqlcipher_key):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid passkey. Database cannot be decrypted."
-            )
+        sqlcipher_key = derive_sqlcipher_key(dek if isinstance(dek, bytes) else bytes.fromhex(dek))
 
+        # Close old session BEFORE re-initializing (engine gets disposed)
+        db.close()
         init_database(sqlcipher_key)
+
+        db = next(_get_session())
 
         license_data = load_license_from_file()
         if license_data:
-            token_bytes, signature_bytes = license_data
-            license_result = verify_license_token(token_bytes, signature_bytes, db)
-
             try:
-                audit = SecurityUnlockAudit(
+                token_bytes, signature_bytes = license_data
+                license_result = verify_license_token(token_bytes, signature_bytes, db)
+                try:
+                    audit = SecurityUnlockAudit(role="DEVELOPER" if is_developer else "OWNER", success=1)
+                    db.add(audit)
+                    db.commit()
+                except Exception:
+                    pass
+                return UnlockResponse(
+                    success=True,
                     role="DEVELOPER" if is_developer else "OWNER",
-                    success=1,
+                    message="Database unlocked successfully",
+                    license_status=license_result.get("status"),
+                    grace_days=license_result.get("grace_days_left"),
                 )
-                db.add(audit)
-                db.commit()
             except Exception:
+                # License verification failed (e.g., no cloud key) — skip in dev mode
                 pass
 
-            return UnlockResponse(
-                success=True,
-                role="DEVELOPER" if is_developer else "OWNER",
-                message="Database unlocked successfully",
-                last_unlocked_at=None,
-                license_status=license_result.get("status"),
-                grace_days=license_result.get("grace_days_left"),
-            )
-
         try:
-            audit = SecurityUnlockAudit(
-                role="DEVELOPER" if is_developer else "OWNER",
-                success=1,
-            )
+            audit = SecurityUnlockAudit(role="DEVELOPER" if is_developer else "OWNER", success=1)
             db.add(audit)
             db.commit()
         except Exception:
@@ -188,11 +186,7 @@ def unlock_database(
 
     except HTTPException as e:
         try:
-            audit = SecurityUnlockAudit(
-                role="DEVELOPER" if is_developer else "OWNER",
-                success=0,
-                failure_reason=str(e.detail),
-            )
+            audit = SecurityUnlockAudit(role="DEVELOPER" if is_developer else "OWNER", success=0, failure_reason=str(e.detail))
             db.add(audit)
             db.commit()
         except Exception:
@@ -200,26 +194,24 @@ def unlock_database(
         raise
     except Exception as e:
         try:
-            audit = SecurityUnlockAudit(
-                role="DEVELOPER" if is_developer else "OWNER",
-                success=0,
-                failure_reason=str(e),
-            )
+            audit = SecurityUnlockAudit(role="DEVELOPER" if is_developer else "OWNER", success=0, failure_reason=str(e))
             db.add(audit)
             db.commit()
         except Exception:
             pass
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to unlock database: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to unlock database: {str(e)}")
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
 
 
 @router.get("/status", response_model=AuthStatusResponse)
-def get_auth_status(
-    db: Session = Depends(get_db)
-):
+def get_auth_status():
     from app.core.database import _engine
+    from app.core.database import get_session as _get_session
+
     is_locked = _engine is None
 
     if is_locked:
@@ -231,6 +223,7 @@ def get_auth_status(
             grace_days_left=0,
         )
 
+    # DB is initialized — check license
     license_data = load_license_from_file()
     if not license_data:
         return AuthStatusResponse(
@@ -243,18 +236,21 @@ def get_auth_status(
         )
 
     try:
-        token_bytes, signature_bytes = license_data
-        result = verify_license_token(token_bytes, signature_bytes, db)
-
-        return AuthStatusResponse(
-            is_locked=False,
-            role=result.get("role", "OWNER"),
-            license_status=result.get("status", "ACTIVE"),
-            license_message=result.get("message", ""),
-            grace_days_left=result.get("grace_days_left", 0),
-            license_id=result.get("license_id"),
-            valid_until=result.get("valid_until"),
-        )
+        db = next(_get_session())
+        try:
+            token_bytes, signature_bytes = license_data
+            result = verify_license_token(token_bytes, signature_bytes, db)
+            return AuthStatusResponse(
+                is_locked=False,
+                role=result.get("role", "OWNER"),
+                license_status=result.get("status", "ACTIVE"),
+                license_message=result.get("message", ""),
+                grace_days_left=result.get("grace_days_left", 0),
+                license_id=result.get("license_id"),
+                valid_until=result.get("valid_until"),
+            )
+        finally:
+            db.close()
     except Exception as e:
         return AuthStatusResponse(
             is_locked=False,

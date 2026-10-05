@@ -11,18 +11,23 @@ from pathlib import Path
 
 import uvicorn
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Fix Windows console encoding (windowed apps have no console)
+if sys.platform == "win32" and sys.stdout is not None:
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if sys.platform == "win32" and sys.stderr is not None:
+    import io
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 def launch_browser(port: int = 8000, delay: float = 1.5):
     """Open browser after server starts."""
     time.sleep(delay)
     url = f"http://127.0.0.1:{port}"
-    print(f"🌐 Opening browser at {url}")
+    print(f"Opening browser at {url}")
     try:
         webbrowser.open(url)
     except Exception as e:
-        print(f"⚠️  Could not open browser: {e}")
+        print(f"Could not open browser: {e}")
         print(f"   Please manually open: {url}")
 
 def main():
@@ -33,10 +38,13 @@ def main():
     print("=" * 50)
     print()
 
+    # Import app directly (works in PyInstaller bundles)
+    from app.main import app
+
     # Check for license file
     license_path = Path.home() / ".leuit" / "license.key"
     if not license_path.exists():
-        print("⚠️  License file not found!")
+        print("License file not found!")
         print(f"   Expected at: {license_path}")
         print("   Run: python scripts/generate_license.py")
         print()
@@ -45,7 +53,7 @@ def main():
     # Check database
     db_path = Path(__file__).parent / "leuit_store.enc"
     if not db_path.exists():
-        print("ℹ️  Database not found, will be created on first unlock")
+        print("Database not found, will be created on first unlock")
         print()
 
     # Start browser in background thread
@@ -53,13 +61,13 @@ def main():
     browser_thread.start()
 
     # Start FastAPI server
-    print("🚀 Starting LEUIT Backend Server...")
+    print("Starting LEUIT Backend Server...")
     print("   Press Ctrl+C to stop")
     print()
 
     try:
         uvicorn.run(
-            "app.main:app",
+            app,
             host="127.0.0.1",
             port=8000,
             log_level="warning",
@@ -67,9 +75,9 @@ def main():
             reload=False,
         )
     except KeyboardInterrupt:
-        print("\n👋 LEUIT stopped by user")
+        print("\nLEUIT stopped by user")
     except Exception as e:
-        print(f"\n❌ Server error: {e}")
+        print(f"\nServer error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

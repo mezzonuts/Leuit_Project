@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Index, Integer, Numeric, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -19,6 +19,7 @@ class Ingredient(Base):
     lead_time_days = Column(Integer, default=1, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     outlet_id = Column(Integer, nullable=True, index=True)
+    category_id = Column(Integer, ForeignKey("ingredient_categories.id"), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 class IngredientBase(BaseModel):
     barcode_sku: str | None = Field(None, max_length=100, pattern=r"^[A-Za-z0-9\-_]+$")
     name: str = Field(..., min_length=1, max_length=255)
-    unit: str = Field(..., pattern="^(ml|gram|pcs)$")
+    unit: str = Field(..., pattern="^(ml|gram|pcs|kg|liter|l|ons|dus|pak|box|tray)$")
     cost_per_unit: float = Field(..., gt=0)
     shelf_life_days: int = Field(..., ge=1)
     current_stock: float = Field(0, ge=0)
@@ -22,7 +22,7 @@ class IngredientCreate(IngredientBase):
 class IngredientUpdate(BaseModel):
     barcode_sku: str | None = Field(None, max_length=100, pattern=r"^[A-Za-z0-9\-_]+$")
     name: str | None = Field(None, min_length=1, max_length=255)
-    unit: str | None = Field(None, pattern="^(ml|gram|pcs)$")
+    unit: str | None = Field(None, pattern="^(ml|gram|pcs|kg|liter|l|ons|dus|pak|box|tray)$")
     cost_per_unit: float | None = Field(None, ge=0)
     shelf_life_days: int | None = Field(None, ge=1)
     current_stock: float | None = Field(None, ge=0)

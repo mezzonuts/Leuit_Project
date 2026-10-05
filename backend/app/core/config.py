@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     # Security
     CLOUD_PUBLIC_KEY_HEX: str = Field(default="", description="Ed25519 public key hex for license verification")
     DEV_PRIVATE_KEY_HEX: str = Field(default="", description="Ed25519 private key hex for developer recovery")
-    PUBLIC_KEY_PATH: str = Field(default="backend/dev_public_key.hex", description="Path to developer public key file")
-    DEV_PRIVATE_KEY_PATH: str = Field(default="backend/dev_private_key.hex", description="Path to developer private key file")
+    PUBLIC_KEY_PATH: str = Field(default="dev_public_key.hex", description="Path to developer public key file")
+    DEV_PRIVATE_KEY_PATH: str = Field(default="dev_private_key.hex", description="Path to developer private key file")
     DEVICE_FINGERPRINT: str | None = None
 
     # License

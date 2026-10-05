@@ -1,5 +1,6 @@
 # Models package exports
 from app.models.audit_log import AuditLog
+from app.models.category import IngredientCategory
 from app.models.ingredient import Ingredient
 from app.models.menu import MenuItem, RecipeItem
 from app.models.outlet import Outlet
@@ -10,6 +11,7 @@ from app.models.transaction import IngredientDailyUsage, PosSyncLog, SalesTransa
 
 __all__ = [
     "AuditLog",
+    "IngredientCategory",
     "Ingredient",
     "Outlet",
     "Supplier",
